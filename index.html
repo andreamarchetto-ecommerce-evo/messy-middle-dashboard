@@ -772,6 +772,30 @@ function loop() {
 
 // ── GA4 Integration ───────────────────────────────────────────
 const API_BASE = 'https://messy-middle-backend-production.up.railway.app';
+
+// Probabilità di transizione — aggiornate da GA4 ogni 24h
+let transitions = {
+  explore_to_evaluate:  0.38,  // default dal funnel iniziale
+  evaluate_to_purchase: 0.09,
+  evaluate_to_explore:  0.20,
+  purchase_complete:    0.52,
+  purchase_to_evaluate: 0.20,
+};
+
+async function fetchFunnel() {
+  try {
+    const res = await fetch(`${API_BASE}/api/funnel`);
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.transitions) {
+      transitions = data.transitions;
+      logEvent(
+        `Funnel aggiornato · Explore→Eval: ${(transitions.explore_to_evaluate*100).toFixed(1)}% · Eval→Purchase: ${(transitions.evaluate_to_purchase*100).toFixed(1)}%`,
+        '#6b6b8a'
+      );
+    }
+  } catch(e) {}
+}
 let ga4Connected = false;
 let lastGA4Data = null;
 
@@ -862,6 +886,9 @@ function init() {
   // Tenta connessione GA4 subito
   setConnectionStatus(false, 'Connecting...');
   fetchGA4();
+  fetchFunnel();
+  // Aggiorna funnel ogni 24h
+  setInterval(fetchFunnel, 24 * 60 * 60 * 1000);
 
   // Aggiorna ogni 60 secondi
   setInterval(fetchGA4, 5000);
