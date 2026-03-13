@@ -234,25 +234,66 @@
     flex-shrink: 0;
   }
 
-  /* Add user button */
-  .add-user-btn {
-    display: block;
-    width: calc(100% - 40px);
-    margin: 20px;
-    padding: 11px;
-    background: rgba(79,195,247,0.08);
-    border: 1px solid rgba(79,195,247,0.25);
-    border-radius: 6px;
-    color: var(--explore);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    cursor: pointer;
-    letter-spacing: 0.05em;
-    transition: all 0.2s;
+  /* ── Toggle sections ── */
+  .toggle-section {
+    border-bottom: 1px solid var(--border);
   }
-  .add-user-btn:hover {
-    background: rgba(79,195,247,0.14);
-    border-color: rgba(79,195,247,0.5);
+  .toggle-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .toggle-header:hover {
+    background: rgba(255,255,255,0.02);
+  }
+  .toggle-title {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+  }
+  .toggle-arrow {
+    font-size: 0.6rem;
+    color: var(--muted);
+    transition: transform 0.2s;
+  }
+  .toggle-arrow.open { transform: rotate(180deg); }
+  .toggle-body {
+    padding: 0 20px 16px;
+    display: none;
+  }
+  .toggle-body.open { display: block; }
+
+  /* ── Funnel stats ── */
+  .funnel-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 0.65rem;
+  }
+  .funnel-label { color: var(--muted); flex: 1; }
+  .funnel-pct {
+    font-weight: 500;
+    font-size: 0.75rem;
+    min-width: 38px;
+    text-align: right;
+  }
+  .funnel-bar-wrap {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .funnel-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s ease;
   }
 </style>
 </head>
@@ -286,38 +327,79 @@
   </div>
 
   <div class="sidebar">
-    <div class="sidebar-section">
-      <div class="section-title">Nudge tactics</div>
 
-      <button class="trigger-btn to-evaluate" onclick="triggerAction('explore→evaluate')">
-        <span class="btn-label">⟶ Move to Evaluation</span>
-        <span class="btn-sub">Show product comparison</span>
-      </button>
-      <button class="trigger-btn to-evaluate" onclick="triggerAction('explore→evaluate-review')">
-        <span class="btn-label">⟶ Activate Social Proof</span>
-        <span class="btn-sub">Verified reviews popup</span>
-      </button>
-      <button class="trigger-btn to-purchase" onclick="triggerAction('evaluate→purchase')">
-        <span class="btn-label">⟶ Move to Purchase</span>
-        <span class="btn-sub">Urgency: expiring offer</span>
-      </button>
-      <button class="trigger-btn to-purchase" onclick="triggerAction('evaluate→purchase-scarcity')">
-        <span class="btn-label">⟶ Scarcity trigger</span>
-        <span class="btn-sub">Only 3 items left</span>
-      </button>
-      <button class="trigger-btn to-explore" onclick="triggerAction('evaluate→explore')">
-        <span class="btn-label">↺ Back to Exploration</span>
-        <span class="btn-sub">Show related products</span>
-      </button>
+    <!-- ── Nudge Tactics ── -->
+    <div class="toggle-section">
+      <div class="toggle-header" onclick="toggleSection('nudge')">
+        <span class="toggle-title">Nudge tactics</span>
+        <span class="toggle-arrow" id="arrow-nudge">▾</span>
+      </div>
+      <div class="toggle-body" id="body-nudge">
+        <button class="trigger-btn to-evaluate" onclick="triggerAction('explore→evaluate')">
+          <span class="btn-label">⟶ Move to Evaluation</span>
+          <span class="btn-sub">Show product comparison</span>
+        </button>
+        <button class="trigger-btn to-evaluate" onclick="triggerAction('explore→evaluate-review')">
+          <span class="btn-label">⟶ Activate Social Proof</span>
+          <span class="btn-sub">Verified reviews popup</span>
+        </button>
+        <button class="trigger-btn to-purchase" onclick="triggerAction('evaluate→purchase')">
+          <span class="btn-label">⟶ Move to Purchase</span>
+          <span class="btn-sub">Urgency: expiring offer</span>
+        </button>
+        <button class="trigger-btn to-purchase" onclick="triggerAction('evaluate→purchase-scarcity')">
+          <span class="btn-label">⟶ Scarcity trigger</span>
+          <span class="btn-sub">Only 3 items left</span>
+        </button>
+        <button class="trigger-btn to-explore" onclick="triggerAction('evaluate→explore')">
+          <span class="btn-label">↺ Back to Exploration</span>
+          <span class="btn-sub">Show related products</span>
+        </button>
+      </div>
     </div>
 
-
-
-    <button class="add-user-btn" onclick="addUser()">+ Simulate new user</button>
-
-    <div class="event-log" id="event-log">
-      <div class="section-title" style="padding-bottom:10px">Recent activity</div>
+    <!-- ── Funnel Stats ── -->
+    <div class="toggle-section">
+      <div class="toggle-header" onclick="toggleSection('funnel')">
+        <span class="toggle-title">Funnel transitions</span>
+        <span class="toggle-arrow" id="arrow-funnel">▾</span>
+      </div>
+      <div class="toggle-body" id="body-funnel">
+        <div class="funnel-row">
+          <span class="funnel-label">Explore → Evaluate</span>
+          <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-e2v" style="background:#69f0ae;width:0%"></div></div>
+          <span class="funnel-pct" id="pct-e2v" style="color:#69f0ae">—</span>
+        </div>
+        <div class="funnel-row">
+          <span class="funnel-label">Evaluate → Purchase</span>
+          <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-v2p" style="background:#40c4ff;width:0%"></div></div>
+          <span class="funnel-pct" id="pct-v2p" style="color:#40c4ff">—</span>
+        </div>
+        <div class="funnel-row">
+          <span class="funnel-label">Evaluate → Explore</span>
+          <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-v2e" style="background:#ffd600;width:0%"></div></div>
+          <span class="funnel-pct" id="pct-v2e" style="color:#ffd600">—</span>
+        </div>
+        <div class="funnel-row">
+          <span class="funnel-label">Purchase complete</span>
+          <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-pc" style="background:#f48fb1;width:0%"></div></div>
+          <span class="funnel-pct" id="pct-pc" style="color:#f48fb1">—</span>
+        </div>
+        <div style="font-size:0.55rem;color:var(--muted);margin-top:8px">Updated every 24h · last 30 days</div>
+      </div>
     </div>
+
+    <!-- ── Recent Activity ── -->
+    <div class="toggle-section" style="flex:1;display:flex;flex-direction:column;border-bottom:none;">
+      <div class="toggle-header" onclick="toggleSection('log')">
+        <span class="toggle-title">Recent activity</span>
+        <span class="toggle-arrow" id="arrow-log">▾</span>
+      </div>
+      <div class="toggle-body" id="body-log" style="flex:1;overflow-y:auto;padding-bottom:20px;">
+        <div id="event-log"></div>
+      </div>
+    </div>
+
   </div>
 </main>
 
@@ -483,6 +565,7 @@ function triggerAction(type) {
 // ── Log ──────────────────────────────────────────────────────
 function logEvent(msg, color) {
   const log = document.getElementById('event-log');
+  if (!log) return;
   const now = new Date();
   const t = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0') + ':' + now.getSeconds().toString().padStart(2,'0');
   const entry = document.createElement('div');
@@ -789,8 +872,9 @@ async function fetchFunnel() {
     const data = await res.json();
     if (data.transitions) {
       transitions = data.transitions;
+      updateFunnelUI(transitions);
       logEvent(
-        `Funnel aggiornato · Explore→Eval: ${(transitions.explore_to_evaluate*100).toFixed(1)}% · Eval→Purchase: ${(transitions.evaluate_to_purchase*100).toFixed(1)}%`,
+        `Funnel updated · Explore→Eval: ${(transitions.explore_to_evaluate*100).toFixed(1)}% · Eval→Purchase: ${(transitions.evaluate_to_purchase*100).toFixed(1)}%`,
         '#6b6b8a'
       );
     }
@@ -873,6 +957,29 @@ function syncUsersWithGA4(data) {
     `GA4: ${(target.exploring||0).toLocaleString('it-IT')} esplorano · ${(target.evaluating||0).toLocaleString('it-IT')} valutano · ${(target.purchasing||0).toLocaleString('it-IT')} acquistano`,
     '#6b6b8a'
   );
+}
+
+// ── Toggle sections ──────────────────────────────────────────
+function toggleSection(id) {
+  const body = document.getElementById('body-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+// ── Funnel UI update ──────────────────────────────────────────
+function updateFunnelUI(t) {
+  const set = (id, barId, val) => {
+    const pct = (val * 100).toFixed(1) + '%';
+    const el = document.getElementById(id);
+    const bar = document.getElementById(barId);
+    if (el) el.textContent = pct;
+    if (bar) bar.style.width = Math.min(100, val * 100) + '%';
+  };
+  set('pct-e2v', 'bar-e2v', t.explore_to_evaluate);
+  set('pct-v2p', 'bar-v2p', t.evaluate_to_purchase);
+  set('pct-v2e', 'bar-v2e', t.evaluate_to_explore);
+  set('pct-pc',  'bar-pc',  t.purchase_complete);
 }
 
 // ── Init ──────────────────────────────────────────────────────
