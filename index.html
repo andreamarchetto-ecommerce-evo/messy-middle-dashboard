@@ -611,37 +611,69 @@ function drawBackground() {
 function drawSchema() {
   const L = getLayout();
   const r = L.lobeR;
+  const ALERT_THRESHOLD = 0.60; // bounce rate critico
 
-  // ── Glow background for lobes ──
-  const glowE = ctx.createRadialGradient(L.explore.x, L.explore.y, 0, L.explore.x, L.explore.y, r*1.3);
-  glowE.addColorStop(0, 'rgba(79,195,247,0.06)');
-  glowE.addColorStop(1, 'transparent');
-  ctx.fillStyle = glowE;
-  ctx.beginPath();
-  ctx.arc(L.explore.x, L.explore.y, r*1.3, 0, Math.PI*2);
-  ctx.fill();
+  // ── Heatmap data per fase ──
+  function getHeat(phase) {
+    if (!pageData || !pageData.phase_breakdown) return { bounce: 0, intensity: 0, alert: false };
+    const d = pageData.phase_breakdown[phase];
+    if (!d) return { bounce: 0, intensity: 0, alert: false };
+    const bounce = d.avg_bounce_rate || 0;
+    const intensity = Math.min(1, bounce / ALERT_THRESHOLD); // 0→1
+    return { bounce, intensity, alert: bounce >= ALERT_THRESHOLD };
+  }
 
-  const glowV = ctx.createRadialGradient(L.evaluate.x, L.evaluate.y, 0, L.evaluate.x, L.evaluate.y, r*1.3);
-  glowV.addColorStop(0, 'rgba(240,98,146,0.06)');
-  glowV.addColorStop(1, 'transparent');
-  ctx.fillStyle = glowV;
-  ctx.beginPath();
-  ctx.arc(L.evaluate.x, L.evaluate.y, r*1.3, 0, Math.PI*2);
-  ctx.fill();
+  // ── drawLobe con heatmap ──
+  function drawLobe(x, y, color, label, phase) {
+    const heat = getHeat(phase);
 
-  // ── Lobe circles ──
-  function drawLobe(x, y, color, label) {
+    // Glow base (colore fase)
+    const glowBase = ctx.createRadialGradient(x, y, 0, x, y, r * 1.3);
+    glowBase.addColorStop(0, color + '18');
+    glowBase.addColorStop(1, 'transparent');
+    ctx.fillStyle = glowBase;
     ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI*2);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.5;
-    ctx.globalAlpha = 0.35;
+    ctx.arc(x, y, r * 1.3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Heatmap overlay — dal verde al rosso in base al bounce rate
+    if (heat.intensity > 0) {
+      const heatColor = heat.alert
+        ? `rgba(255,82,82,${(heat.intensity * 0.18).toFixed(2)})`
+        : `rgba(255,193,7,${(heat.intensity * 0.12).toFixed(2)})`;
+      const glowHeat = ctx.createRadialGradient(x, y, 0, x, y, r * 1.2);
+      glowHeat.addColorStop(0, heatColor);
+      glowHeat.addColorStop(1, 'transparent');
+      ctx.fillStyle = glowHeat;
+      ctx.beginPath();
+      ctx.arc(x, y, r * 1.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Alert ring pulsante
+    if (heat.alert) {
+      const pulse = 0.5 + 0.5 * Math.sin(frame * 0.06);
+      ctx.beginPath();
+      ctx.arc(x, y, r * 1.1 + pulse * 6, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255,82,82,0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.globalAlpha = 0.6 * pulse;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    // Lobe circle — più spesso se in alert
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.strokeStyle = heat.alert ? '#ff5252' : color;
+    ctx.lineWidth = heat.alert ? 2 : 1.5;
+    ctx.globalAlpha = heat.alert ? 0.7 : 0.35;
     ctx.stroke();
     ctx.globalAlpha = 1;
 
     // Inner ring
     ctx.beginPath();
-    ctx.arc(x, y, r * 0.55, 0, Math.PI*2);
+    ctx.arc(x, y, r * 0.55, 0, Math.PI * 2);
     ctx.strokeStyle = color;
     ctx.lineWidth = 0.5;
     ctx.globalAlpha = 0.15;
@@ -650,15 +682,24 @@ function drawSchema() {
 
     // Label
     ctx.font = '500 11px "DM Mono", monospace';
-    ctx.fillStyle = color;
-    ctx.globalAlpha = 0.7;
+    ctx.fillStyle = heat.alert ? '#ff5252' : color;
+    ctx.globalAlpha = 0.85;
     ctx.textAlign = 'center';
     ctx.fillText(label.toUpperCase(), x, y - r - 12);
     ctx.globalAlpha = 1;
+
+    // Bounce rate sotto la label
+    if (heat.bounce > 0) {
+      const bounceLabel = `bounce ${(heat.bounce * 100).toFixed(0)}%`;
+      ctx.font = '400 9px "DM Mono", monospace';
+      ctx.fillStyle = heat.alert ? '#ff5252' : 'rgba(255,255,255,0.35)';
+      ctx.globalAlpha = 1;
+      ctx.fillText(bounceLabel, x, y - r - 1);
+    }
   }
 
-  drawLobe(L.explore.x, L.explore.y, '#ffd600', 'Exploration');
-  drawLobe(L.evaluate.x, L.evaluate.y, '#69f0ae', 'Evaluation');
+  drawLobe(L.explore.x, L.explore.y, '#ffd600', 'Exploration', 'exploring');
+  drawLobe(L.evaluate.x, L.evaluate.y, '#69f0ae', 'Evaluation', 'evaluating');
 
   // ── Connecting path (the "messy" loop between lobes) ──
   ctx.beginPath();
@@ -882,6 +923,7 @@ async function fetchFunnel() {
 }
 let ga4Connected = false;
 let lastGA4Data = null;
+let pageData = null; // dati heatmap per fase
 
 // Indicatore connessione nell'header
 function setConnectionStatus(ok, msg) {
@@ -894,6 +936,33 @@ function setConnectionStatus(ok, msg) {
     badge.innerHTML = `<div class="live-dot" style="background:#ff9800;animation:none"></div> ${msg}`;
     badge.style.color = '#ff9800';
   }
+}
+
+async function fetchPages() {
+  try {
+    const res = await fetch(`${API_BASE}/api/pages`);
+    if (!res.ok) return;
+    const data = await res.json();
+    pageData = data;
+    checkAlerts(data);
+  } catch(e) {}
+}
+
+const ALERT_THRESHOLD = 0.60;
+const alertedPhases = new Set();
+
+function checkAlerts(data) {
+  if (!data.phase_breakdown) return;
+  Object.entries(data.phase_breakdown).forEach(([phase, d]) => {
+    const bounce = d.avg_bounce_rate || 0;
+    if (bounce >= ALERT_THRESHOLD && !alertedPhases.has(phase)) {
+      alertedPhases.add(phase);
+      const phaseName = phase === 'exploring' ? 'Exploration' : phase === 'evaluating' ? 'Evaluation' : 'Purchase';
+      logEvent(`⚠ ${phaseName}: bounce rate ${(bounce*100).toFixed(0)}% — above threshold!`, '#ff5252');
+    } else if (bounce < ALERT_THRESHOLD) {
+      alertedPhases.delete(phase);
+    }
+  });
 }
 
 async function fetchGA4() {
@@ -994,8 +1063,10 @@ function init() {
   setConnectionStatus(false, 'Connecting...');
   fetchGA4();
   fetchFunnel();
-  // Aggiorna funnel ogni 24h
+  fetchPages();
+  // Aggiorna funnel ogni 24h, pages ogni 5 min
   setInterval(fetchFunnel, 24 * 60 * 60 * 1000);
+  setInterval(fetchPages, 5 * 60 * 1000);
 
   // Aggiorna ogni 60 secondi
   setInterval(fetchGA4, 5000);
