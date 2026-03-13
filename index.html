@@ -777,22 +777,69 @@ function drawSchema() {
   ctx.fillText('(entry point)', L.trigger.x, L.trigger.y - 12);
 
   // ── Purchase node ──
+  const purHeat = (() => {
+    if (!pageData || !pageData.phase_breakdown) return { bounce: 0, alert: false, intensity: 0 };
+    const d = pageData.phase_breakdown['purchasing'];
+    if (!d) return { bounce: 0, alert: false, intensity: 0 };
+    const bounce = d.avg_bounce_rate || 0;
+    return { bounce, alert: bounce >= 0.60, intensity: Math.min(1, bounce / 0.60) };
+  })();
+
+  const purColor = purHeat.alert ? '#ff5252' : '#40c4ff';
   const purPulse = 0.7 + 0.3 * Math.sin(frame * 0.04 + 1);
+
+  // Heatmap glow attorno al nodo
+  if (purHeat.intensity > 0) {
+    const heatGlow = ctx.createRadialGradient(L.purchase.x, L.purchase.y, 0, L.purchase.x, L.purchase.y, 60);
+    heatGlow.addColorStop(0, purHeat.alert
+      ? `rgba(255,82,82,${(purHeat.intensity * 0.25).toFixed(2)})`
+      : `rgba(255,193,7,${(purHeat.intensity * 0.15).toFixed(2)})`);
+    heatGlow.addColorStop(1, 'transparent');
+    ctx.fillStyle = heatGlow;
+    ctx.beginPath();
+    ctx.arc(L.purchase.x, L.purchase.y, 60, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Alert ring pulsante
+  if (purHeat.alert) {
+    const alertPulse = 0.5 + 0.5 * Math.sin(frame * 0.06);
+    ctx.beginPath();
+    ctx.arc(L.purchase.x, L.purchase.y, 28 + alertPulse * 8, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255,82,82,0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.globalAlpha = 0.7 * alertPulse;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  // Outer pulse ring
   ctx.beginPath();
-  ctx.arc(L.purchase.x, L.purchase.y, 20 * purPulse, 0, Math.PI*2);
-  ctx.strokeStyle = 'rgba(64,196,255,0.3)';
+  ctx.arc(L.purchase.x, L.purchase.y, 20 * purPulse, 0, Math.PI * 2);
+  ctx.strokeStyle = purHeat.alert ? 'rgba(255,82,82,0.4)' : 'rgba(64,196,255,0.3)';
   ctx.lineWidth = 1;
   ctx.stroke();
+
+  // Core dot
   ctx.beginPath();
-  ctx.arc(L.purchase.x, L.purchase.y, 10, 0, Math.PI*2);
-  ctx.fillStyle = '#40c4ff';
+  ctx.arc(L.purchase.x, L.purchase.y, 10, 0, Math.PI * 2);
+  ctx.fillStyle = purColor;
   ctx.globalAlpha = 0.9;
   ctx.fill();
   ctx.globalAlpha = 1;
+
+  // Label
   ctx.font = '500 10px "DM Mono"';
-  ctx.fillStyle = 'rgba(64,196,255,0.9)';
+  ctx.fillStyle = purHeat.alert ? 'rgba(255,82,82,0.9)' : 'rgba(64,196,255,0.9)';
   ctx.textAlign = 'center';
   ctx.fillText('PURCHASE', L.purchase.x, L.purchase.y + 26);
+
+  // Bounce rate
+  if (purHeat.bounce > 0) {
+    ctx.font = '400 9px "DM Mono"';
+    ctx.fillStyle = purHeat.alert ? '#ff5252' : 'rgba(255,255,255,0.35)';
+    ctx.fillText(`bounce ${(purHeat.bounce * 100).toFixed(0)}%`, L.purchase.x, L.purchase.y + 38);
+  }
 }
 
 function drawUsers() {
