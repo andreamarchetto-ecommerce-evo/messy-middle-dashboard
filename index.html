@@ -49,7 +49,8 @@
     letter-spacing: -0.02em;
     color: var(--text);
   }
-  .logo span { color: var(--explore); }
+  .logo .logo-mm { color: #40c4ff; }
+  .logo .logo-live { color: #a5d6a7; }
 
   .stats {
     display: flex;
@@ -258,7 +259,7 @@
 <body>
 
 <header>
-  <div class="logo">messy <span>middle</span> · live</div>
+  <div class="logo"><span class="logo-mm">messy middle</span> · <span class="logo-live">live</span></div>
   <div class="stats">
     <div class="stat">
       <div class="stat-value exploring" id="stat-exploring">0</div>
@@ -310,27 +311,7 @@
       </button>
     </div>
 
-    <div class="sidebar-section">
-      <div class="section-title">Legend</div>
-      <div class="legend">
-        <div class="legend-item">
-          <div class="legend-dot" style="background:#ffd600"></div>
-          Exploration (discovering)
-        </div>
-        <div class="legend-item">
-          <div class="legend-dot" style="background:#69f0ae"></div>
-          Evaluation (evaluating)
-        </div>
-        <div class="legend-item">
-          <div class="legend-dot" style="background:#40c4ff;"></div>
-          Imminent purchase
-        </div>
-        <div class="legend-item">
-          <div class="legend-dot" style="background:#f48fb1"></div>
-          New session entry
-        </div>
-      </div>
-    </div>
+
 
     <button class="add-user-btn" onclick="addUser()">+ Simulate new user</button>
 
