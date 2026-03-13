@@ -835,7 +835,7 @@ function syncUsersWithGA4(data) {
     const diff = targetDots - currentDots;
 
     if (diff > 0) {
-      for (let i = 0; i < diff; i++) setTimeout(() => addUser(phase, phase === 'exploring'), i * 80);
+      for (let i = 0; i < diff; i++) setTimeout(() => addUser(phase, phase === 'exploring' && Math.random() < 0.20), i * 80);
     } else if (diff < 0) {
       let removed = 0;
       for (let i = users.length - 1; i >= 0 && removed < Math.abs(diff); i--) {
