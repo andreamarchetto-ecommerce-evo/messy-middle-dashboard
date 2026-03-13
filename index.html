@@ -365,6 +365,8 @@
         <span class="toggle-arrow" id="arrow-funnel">▾</span>
       </div>
       <div class="toggle-body" id="body-funnel">
+
+        <div style="font-size:0.58rem;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.1em">Transitions</div>
         <div class="funnel-row">
           <span class="funnel-label">Explore → Evaluate</span>
           <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-e2v" style="background:#69f0ae;width:0%"></div></div>
@@ -385,7 +387,28 @@
           <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-pc" style="background:#f48fb1;width:0%"></div></div>
           <span class="funnel-pct" id="pct-pc" style="color:#f48fb1">—</span>
         </div>
-        <div style="font-size:0.55rem;color:var(--muted);margin-top:8px">Updated every 24h · last 30 days</div>
+
+        <div style="font-size:0.58rem;color:var(--muted);margin:14px 0 10px;text-transform:uppercase;letter-spacing:0.1em">Bounce rate by phase</div>
+        <div class="funnel-row">
+          <span class="funnel-label">Exploration</span>
+          <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-br-exp" style="background:#ffd600;width:0%"></div></div>
+          <span class="funnel-pct" id="pct-br-exp" style="color:#ffd600">—</span>
+        </div>
+        <div class="funnel-row">
+          <span class="funnel-label">Evaluation</span>
+          <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-br-eva" style="background:#69f0ae;width:0%"></div></div>
+          <span class="funnel-pct" id="pct-br-eva" style="color:#69f0ae">—</span>
+        </div>
+        <div class="funnel-row">
+          <span class="funnel-label">Purchase</span>
+          <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-br-pur" style="background:#40c4ff;width:0%"></div></div>
+          <span class="funnel-pct" id="pct-br-pur" style="color:#40c4ff">—</span>
+        </div>
+
+        <div style="font-size:0.55rem;color:var(--muted);margin-top:10px">
+          Transitions: every 24h · last 30 days<br>
+          Bounce rate: every 5 min · today
+        </div>
       </div>
     </div>
 
@@ -992,6 +1015,7 @@ async function fetchPages() {
     const data = await res.json();
     pageData = data;
     checkAlerts(data);
+    updateBounceUI(data);
   } catch(e) {}
 }
 
@@ -1085,17 +1109,39 @@ function toggleSection(id) {
 
 // ── Funnel UI update ──────────────────────────────────────────
 function updateFunnelUI(t) {
-  const set = (id, barId, val) => {
+  const set = (id, barId, val, alert) => {
     const pct = (val * 100).toFixed(1) + '%';
     const el = document.getElementById(id);
     const bar = document.getElementById(barId);
-    if (el) el.textContent = pct;
-    if (bar) bar.style.width = Math.min(100, val * 100) + '%';
+    if (el) {
+      el.textContent = pct;
+      if (alert) el.style.color = '#ff5252';
+    }
+    if (bar) {
+      bar.style.width = Math.min(100, val * 100) + '%';
+      if (alert) bar.style.background = '#ff5252';
+    }
   };
   set('pct-e2v', 'bar-e2v', t.explore_to_evaluate);
   set('pct-v2p', 'bar-v2p', t.evaluate_to_purchase);
   set('pct-v2e', 'bar-v2e', t.evaluate_to_explore);
   set('pct-pc',  'bar-pc',  t.purchase_complete);
+}
+
+function updateBounceUI(data) {
+  if (!data || !data.phase_breakdown) return;
+  const set = (id, barId, val) => {
+    const alert = val >= 0.60;
+    const pct = (val * 100).toFixed(0) + '%';
+    const el = document.getElementById(id);
+    const bar = document.getElementById(barId);
+    if (el) { el.textContent = pct; el.style.color = alert ? '#ff5252' : ''; }
+    if (bar) { bar.style.width = Math.min(100, val * 100) + '%'; bar.style.background = alert ? '#ff5252' : ''; }
+  };
+  const pb = data.phase_breakdown;
+  if (pb.exploring)  set('pct-br-exp', 'bar-br-exp', pb.exploring.avg_bounce_rate  || 0);
+  if (pb.evaluating) set('pct-br-eva', 'bar-br-eva', pb.evaluating.avg_bounce_rate || 0);
+  if (pb.purchasing) set('pct-br-pur', 'bar-br-pur', pb.purchasing.avg_bounce_rate || 0);
 }
 
 // ── Init ──────────────────────────────────────────────────────
