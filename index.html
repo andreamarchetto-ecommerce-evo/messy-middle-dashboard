@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,11 +16,8 @@
     --purchase: #40c4ff;
     --text: #e8e8f0;
     --muted: #6b6b8a;
-    --glow-explore: rgba(255,214,0,0.15);
-    --glow-evaluate: rgba(105,240,174,0.15);
   }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin:0; padding:0; box-sizing:border-box; }
 
   body {
     background: var(--bg);
@@ -37,85 +34,94 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 18px 32px;
+    padding: 12px 24px;
     border-bottom: 1px solid var(--border);
     background: var(--surface);
     flex-shrink: 0;
+    gap: 16px;
   }
+  .logo { font-family:'DM Serif Display',serif; font-size:1.1rem; letter-spacing:-0.02em; }
+  .logo .logo-mm { color:#40c4ff; }
+  .logo .logo-live { color:#a5d6a7; }
+  .stats { display:flex; gap:20px; }
+  .stat { text-align:center; }
+  .stat-value { font-size:1.2rem; font-weight:500; line-height:1; }
+  .stat-label { font-size:0.55rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.1em; margin-top:2px; }
+  .stat-value.exploring { color:var(--explore); }
+  .stat-value.evaluating { color:var(--evaluate); }
+  .stat-value.purchasing { color:var(--purchase); }
+  .live-badge { display:flex; align-items:center; gap:6px; font-size:0.6rem; text-transform:uppercase; letter-spacing:0.12em; }
+  .live-dot { width:6px; height:6px; border-radius:50%; animation:pulse 1.4s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
 
-  .logo {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.2rem;
-    letter-spacing: -0.02em;
-    color: var(--text);
-  }
-  .logo .logo-mm { color: #40c4ff; }
-  .logo .logo-live { color: #a5d6a7; }
-
-  .stats {
-    display: flex;
-    gap: 28px;
-  }
-  .stat {
-    text-align: center;
-  }
-  .stat-value {
-    font-size: 1.4rem;
-    font-weight: 500;
-    line-height: 1;
-  }
-  .stat-label {
-    font-size: 0.6rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-top: 3px;
-  }
-  .stat-value.exploring { color: var(--explore); }
-  .stat-value.evaluating { color: var(--evaluate); }
-  .stat-value.purchasing { color: var(--purchase); }
-
-  .live-badge {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 0.65rem;
-    color: var(--trigger);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-  }
-  .live-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--trigger);
-    animation: pulse 1.4s infinite;
-  }
-  @keyframes pulse {
-    0%,100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.4); }
-  }
-
-  /* ── Main Layout ── */
-  main {
+  /* ── Layout ── */
+  .grid {
     flex: 1;
     display: grid;
-    grid-template-columns: 1fr 280px;
-    gap: 0;
+    grid-template-rows: 1fr 1fr;
     overflow: hidden;
+    min-height: 0;
   }
 
-  /* ── Canvas Area ── */
-  .canvas-area {
+  /* Row 1: NOW (65%) + Sidebar (35%) */
+  .row-top {
+    display: grid;
+    grid-template-columns: 65fr 35fr;
+    border-bottom: 1px solid var(--border);
+    min-height: 0;
+  }
+
+  /* Row 2: No Action (50%) + With Tactics (50%) */
+  .row-bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 0;
+  }
+
+  /* ── Canvas panels ── */
+  .panel {
     position: relative;
     overflow: hidden;
-    padding: 24px;
+    min-height: 0;
+  }
+  .panel + .panel { border-left: 1px solid var(--border); }
+  .panel canvas { display:block; width:100%; height:100%; }
+
+  .panel-label {
+    position: absolute;
+    top: 10px;
+    left: 14px;
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-label .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
   }
 
-  canvas {
-    width: 100%;
-    height: 100%;
-    display: block;
+  /* Play/pause button */
+  .panel-toggle {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 10;
   }
+  .panel-toggle:hover { background:rgba(255,255,255,0.08); color:var(--text); }
 
   /* ── Sidebar ── */
   .sidebar {
@@ -124,177 +130,60 @@
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    overflow-x: hidden;
   }
+  .sidebar::-webkit-scrollbar { width:3px; }
+  .sidebar::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
 
-  .sidebar-section {
-    padding: 20px;
-    border-bottom: 1px solid var(--border);
+  /* ── Toggle sections ── */
+  .toggle-section { border-bottom:1px solid var(--border); }
+  .toggle-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 16px; cursor:pointer; user-select:none;
+    transition:background 0.15s;
   }
-
-  .section-title {
-    font-size: 0.6rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--muted);
-    margin-bottom: 14px;
-  }
+  .toggle-header:hover { background:rgba(255,255,255,0.02); }
+  .toggle-title { font-size:0.58rem; text-transform:uppercase; letter-spacing:0.14em; color:var(--muted); }
+  .toggle-arrow { font-size:0.58rem; color:var(--muted); transition:transform 0.2s; }
+  .toggle-arrow.open { transform:rotate(180deg); }
+  .toggle-body { padding:0 16px 14px; display:none; }
+  .toggle-body.open { display:block; }
 
   /* ── Trigger Buttons ── */
   .trigger-btn {
-    display: block;
-    width: 100%;
-    padding: 10px 14px;
-    margin-bottom: 8px;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    cursor: pointer;
-    text-align: left;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
+    display:block; width:100%; padding:8px 12px; margin-bottom:6px;
+    background:transparent; border:1px solid var(--border); border-radius:5px;
+    color:var(--text); font-family:'DM Mono',monospace; font-size:0.65rem;
+    cursor:pointer; text-align:left; transition:all 0.2s; position:relative; overflow:hidden;
   }
   .trigger-btn::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 3px;
-    border-radius: 3px 0 0 3px;
+    content:''; position:absolute; left:0; top:0; bottom:0;
+    width:3px; border-radius:3px 0 0 3px;
   }
-  .trigger-btn.to-evaluate::before { background: var(--evaluate); }
-  .trigger-btn.to-purchase::before { background: var(--purchase); }
-  .trigger-btn.to-explore::before { background: var(--explore); }
+  .trigger-btn.to-evaluate::before { background:var(--evaluate); }
+  .trigger-btn.to-purchase::before { background:var(--purchase); }
+  .trigger-btn.to-explore::before  { background:var(--explore); }
+  .trigger-btn:hover { border-color:var(--muted); background:rgba(255,255,255,0.03); transform:translateX(2px); }
+  .trigger-btn .btn-label { display:block; color:var(--text); margin-bottom:2px; }
+  .trigger-btn .btn-sub   { display:block; color:var(--muted); font-size:0.55rem; }
 
-  .trigger-btn:hover {
-    border-color: var(--muted);
-    background: rgba(255,255,255,0.03);
-    transform: translateX(2px);
-  }
-
-  .trigger-btn .btn-label {
-    display: block;
-    color: var(--text);
-    margin-bottom: 2px;
-  }
-  .trigger-btn .btn-sub {
-    display: block;
-    color: var(--muted);
-    font-size: 0.58rem;
-  }
+  /* ── Funnel bars ── */
+  .funnel-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:0.62rem; }
+  .funnel-label { color:var(--muted); flex:1; font-size:0.6rem; }
+  .funnel-pct { font-weight:500; font-size:0.7rem; min-width:34px; text-align:right; }
+  .funnel-bar-wrap { flex:1; height:3px; background:var(--border); border-radius:2px; overflow:hidden; }
+  .funnel-bar { height:100%; border-radius:2px; transition:width 0.6s ease; }
+  .funnel-sub-title { font-size:0.55rem; color:var(--muted); margin:12px 0 8px; text-transform:uppercase; letter-spacing:0.1em; }
 
   /* ── Event Log ── */
-  .event-log {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-  }
-  .event-log::-webkit-scrollbar { width: 3px; }
-  .event-log::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-  .log-entry {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-    animation: slideIn 0.3s ease;
-    font-size: 0.65rem;
-    line-height: 1.4;
-  }
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateX(8px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-  .log-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    margin-top: 4px;
-    flex-shrink: 0;
-  }
-  .log-time { color: var(--muted); }
-  .log-msg { color: var(--text); }
-
-  /* ── Legend ── */
-  .legend {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.65rem;
-    color: var(--muted);
-  }
-  .legend-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  /* ── Toggle sections ── */
-  .toggle-section {
-    border-bottom: 1px solid var(--border);
-  }
-  .toggle-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 20px;
-    cursor: pointer;
-    user-select: none;
-    transition: background 0.15s;
-  }
-  .toggle-header:hover {
-    background: rgba(255,255,255,0.02);
-  }
-  .toggle-title {
-    font-size: 0.6rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--muted);
-  }
-  .toggle-arrow {
-    font-size: 0.6rem;
-    color: var(--muted);
-    transition: transform 0.2s;
-  }
-  .toggle-arrow.open { transform: rotate(180deg); }
-  .toggle-body {
-    padding: 0 20px 16px;
-    display: none;
-  }
-  .toggle-body.open { display: block; }
-
-  /* ── Funnel stats ── */
-  .funnel-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-    font-size: 0.65rem;
-  }
-  .funnel-label { color: var(--muted); flex: 1; }
-  .funnel-pct {
-    font-weight: 500;
-    font-size: 0.75rem;
-    min-width: 38px;
-    text-align: right;
-  }
-  .funnel-bar-wrap {
-    flex: 1;
-    height: 3px;
-    background: var(--border);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .funnel-bar {
-    height: 100%;
-    border-radius: 2px;
-    transition: width 0.6s ease;
-  }
+  .event-log-wrap { flex:1; overflow-y:auto; padding-bottom:12px; }
+  .event-log-wrap::-webkit-scrollbar { width:3px; }
+  .event-log-wrap::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+  .log-entry { display:flex; gap:8px; margin-bottom:8px; animation:slideIn 0.3s ease; font-size:0.6rem; line-height:1.4; }
+  @keyframes slideIn { from{opacity:0;transform:translateX(6px)} to{opacity:1;transform:translateX(0)} }
+  .log-dot { width:5px; height:5px; border-radius:50%; margin-top:4px; flex-shrink:0; }
+  .log-time { color:var(--muted); }
+  .log-msg { color:var(--text); }
 </style>
 </head>
 <body>
@@ -316,665 +205,662 @@
     </div>
   </div>
   <div class="live-badge">
-    <div class="live-dot"></div>
-    Live
+    <div class="live-dot" style="background:#a5d6a7"></div>
+    <span id="conn-label">Connecting...</span>
   </div>
 </header>
 
-<main>
-  <div class="canvas-area">
-    <canvas id="canvas"></canvas>
+<div class="grid">
+
+  <!-- Row 1 -->
+  <div class="row-top">
+
+    <!-- NOW panel -->
+    <div class="panel" id="panel-now">
+      <div class="panel-label">
+        <span class="dot" style="background:#a5d6a7"></span>
+        Now · Live
+      </div>
+      <button class="panel-toggle" onclick="toggleAnim('now')">⏸</button>
+      <canvas id="canvas-now"></canvas>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+
+      <div class="toggle-section">
+        <div class="toggle-header" onclick="toggleSection('nudge')">
+          <span class="toggle-title">Nudge tactics</span>
+          <span class="toggle-arrow" id="arrow-nudge">▾</span>
+        </div>
+        <div class="toggle-body" id="body-nudge">
+          <button class="trigger-btn to-evaluate" onclick="triggerAction('explore→evaluate')">
+            <span class="btn-label">⟶ Move to Evaluation</span>
+            <span class="btn-sub">Show product comparison</span>
+          </button>
+          <button class="trigger-btn to-evaluate" onclick="triggerAction('explore→evaluate-review')">
+            <span class="btn-label">⟶ Activate Social Proof</span>
+            <span class="btn-sub">Verified reviews popup</span>
+          </button>
+          <button class="trigger-btn to-purchase" onclick="triggerAction('evaluate→purchase')">
+            <span class="btn-label">⟶ Move to Purchase</span>
+            <span class="btn-sub">Urgency: expiring offer</span>
+          </button>
+          <button class="trigger-btn to-purchase" onclick="triggerAction('evaluate→purchase-scarcity')">
+            <span class="btn-label">⟶ Scarcity trigger</span>
+            <span class="btn-sub">Only 3 items left</span>
+          </button>
+          <button class="trigger-btn to-explore" onclick="triggerAction('evaluate→explore')">
+            <span class="btn-label">↺ Back to Exploration</span>
+            <span class="btn-sub">Show related products</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="toggle-section">
+        <div class="toggle-header" onclick="toggleSection('funnel')">
+          <span class="toggle-title">Funnel transitions</span>
+          <span class="toggle-arrow" id="arrow-funnel">▾</span>
+        </div>
+        <div class="toggle-body" id="body-funnel">
+          <div class="funnel-sub-title">Transitions</div>
+          <div class="funnel-row">
+            <span class="funnel-label">Explore → Evaluate</span>
+            <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-e2v" style="background:#69f0ae;width:0%"></div></div>
+            <span class="funnel-pct" id="pct-e2v" style="color:#69f0ae">—</span>
+          </div>
+          <div class="funnel-row">
+            <span class="funnel-label">Evaluate → Purchase</span>
+            <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-v2p" style="background:#40c4ff;width:0%"></div></div>
+            <span class="funnel-pct" id="pct-v2p" style="color:#40c4ff">—</span>
+          </div>
+          <div class="funnel-row">
+            <span class="funnel-label">Evaluate → Explore</span>
+            <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-v2e" style="background:#ffd600;width:0%"></div></div>
+            <span class="funnel-pct" id="pct-v2e" style="color:#ffd600">—</span>
+          </div>
+          <div class="funnel-row">
+            <span class="funnel-label">Purchase complete</span>
+            <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-pc" style="background:#f48fb1;width:0%"></div></div>
+            <span class="funnel-pct" id="pct-pc" style="color:#f48fb1">—</span>
+          </div>
+          <div class="funnel-sub-title">Bounce rate by phase</div>
+          <div class="funnel-row">
+            <span class="funnel-label">Exploration</span>
+            <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-br-exp" style="background:#ffd600;width:0%"></div></div>
+            <span class="funnel-pct" id="pct-br-exp" style="color:#ffd600">—</span>
+          </div>
+          <div class="funnel-row">
+            <span class="funnel-label">Evaluation</span>
+            <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-br-eva" style="background:#69f0ae;width:0%"></div></div>
+            <span class="funnel-pct" id="pct-br-eva" style="color:#69f0ae">—</span>
+          </div>
+          <div class="funnel-row">
+            <span class="funnel-label">Purchase</span>
+            <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-br-pur" style="background:#40c4ff;width:0%"></div></div>
+            <span class="funnel-pct" id="pct-br-pur" style="color:#40c4ff">—</span>
+          </div>
+          <div style="font-size:0.52rem;color:var(--muted);margin-top:8px">
+            Transitions: every 24h · last 30 days<br>
+            Bounce rate: every 5 min · today
+          </div>
+        </div>
+      </div>
+
+      <div class="toggle-section" style="flex:1;display:flex;flex-direction:column;border-bottom:none;">
+        <div class="toggle-header" onclick="toggleSection('log')">
+          <span class="toggle-title">Recent activity</span>
+          <span class="toggle-arrow" id="arrow-log">▾</span>
+        </div>
+        <div class="toggle-body event-log-wrap" id="body-log">
+          <div id="event-log"></div>
+        </div>
+      </div>
+
+    </div>
   </div>
 
-  <div class="sidebar">
+  <!-- Row 2 -->
+  <div class="row-bottom">
 
-    <!-- ── Nudge Tactics ── -->
-    <div class="toggle-section">
-      <div class="toggle-header" onclick="toggleSection('nudge')">
-        <span class="toggle-title">Nudge tactics</span>
-        <span class="toggle-arrow" id="arrow-nudge">▾</span>
+    <!-- NO ACTION panel -->
+    <div class="panel" id="panel-noaction">
+      <div class="panel-label">
+        <span class="dot" style="background:#ff9800"></span>
+        +7 days · No action
       </div>
-      <div class="toggle-body" id="body-nudge">
-        <button class="trigger-btn to-evaluate" onclick="triggerAction('explore→evaluate')">
-          <span class="btn-label">⟶ Move to Evaluation</span>
-          <span class="btn-sub">Show product comparison</span>
-        </button>
-        <button class="trigger-btn to-evaluate" onclick="triggerAction('explore→evaluate-review')">
-          <span class="btn-label">⟶ Activate Social Proof</span>
-          <span class="btn-sub">Verified reviews popup</span>
-        </button>
-        <button class="trigger-btn to-purchase" onclick="triggerAction('evaluate→purchase')">
-          <span class="btn-label">⟶ Move to Purchase</span>
-          <span class="btn-sub">Urgency: expiring offer</span>
-        </button>
-        <button class="trigger-btn to-purchase" onclick="triggerAction('evaluate→purchase-scarcity')">
-          <span class="btn-label">⟶ Scarcity trigger</span>
-          <span class="btn-sub">Only 3 items left</span>
-        </button>
-        <button class="trigger-btn to-explore" onclick="triggerAction('evaluate→explore')">
-          <span class="btn-label">↺ Back to Exploration</span>
-          <span class="btn-sub">Show related products</span>
-        </button>
-      </div>
+      <button class="panel-toggle" onclick="toggleAnim('noaction')">⏸</button>
+      <canvas id="canvas-noaction"></canvas>
     </div>
 
-    <!-- ── Funnel Stats ── -->
-    <div class="toggle-section">
-      <div class="toggle-header" onclick="toggleSection('funnel')">
-        <span class="toggle-title">Funnel transitions</span>
-        <span class="toggle-arrow" id="arrow-funnel">▾</span>
+    <!-- WITH TACTICS panel -->
+    <div class="panel" id="panel-tactics">
+      <div class="panel-label">
+        <span class="dot" style="background:#69f0ae"></span>
+        +7 days · With tactics
       </div>
-      <div class="toggle-body" id="body-funnel">
-
-        <div style="font-size:0.58rem;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.1em">Transitions</div>
-        <div class="funnel-row">
-          <span class="funnel-label">Explore → Evaluate</span>
-          <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-e2v" style="background:#69f0ae;width:0%"></div></div>
-          <span class="funnel-pct" id="pct-e2v" style="color:#69f0ae">—</span>
-        </div>
-        <div class="funnel-row">
-          <span class="funnel-label">Evaluate → Purchase</span>
-          <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-v2p" style="background:#40c4ff;width:0%"></div></div>
-          <span class="funnel-pct" id="pct-v2p" style="color:#40c4ff">—</span>
-        </div>
-        <div class="funnel-row">
-          <span class="funnel-label">Evaluate → Explore</span>
-          <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-v2e" style="background:#ffd600;width:0%"></div></div>
-          <span class="funnel-pct" id="pct-v2e" style="color:#ffd600">—</span>
-        </div>
-        <div class="funnel-row">
-          <span class="funnel-label">Purchase complete</span>
-          <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-pc" style="background:#f48fb1;width:0%"></div></div>
-          <span class="funnel-pct" id="pct-pc" style="color:#f48fb1">—</span>
-        </div>
-
-        <div style="font-size:0.58rem;color:var(--muted);margin:14px 0 10px;text-transform:uppercase;letter-spacing:0.1em">Bounce rate by phase</div>
-        <div class="funnel-row">
-          <span class="funnel-label">Exploration</span>
-          <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-br-exp" style="background:#ffd600;width:0%"></div></div>
-          <span class="funnel-pct" id="pct-br-exp" style="color:#ffd600">—</span>
-        </div>
-        <div class="funnel-row">
-          <span class="funnel-label">Evaluation</span>
-          <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-br-eva" style="background:#69f0ae;width:0%"></div></div>
-          <span class="funnel-pct" id="pct-br-eva" style="color:#69f0ae">—</span>
-        </div>
-        <div class="funnel-row">
-          <span class="funnel-label">Purchase</span>
-          <div class="funnel-bar-wrap"><div class="funnel-bar" id="bar-br-pur" style="background:#40c4ff;width:0%"></div></div>
-          <span class="funnel-pct" id="pct-br-pur" style="color:#40c4ff">—</span>
-        </div>
-
-        <div style="font-size:0.55rem;color:var(--muted);margin-top:10px">
-          Transitions: every 24h · last 30 days<br>
-          Bounce rate: every 5 min · today
-        </div>
-      </div>
-    </div>
-
-    <!-- ── Recent Activity ── -->
-    <div class="toggle-section" style="flex:1;display:flex;flex-direction:column;border-bottom:none;">
-      <div class="toggle-header" onclick="toggleSection('log')">
-        <span class="toggle-title">Recent activity</span>
-        <span class="toggle-arrow" id="arrow-log">▾</span>
-      </div>
-      <div class="toggle-body" id="body-log" style="flex:1;overflow-y:auto;padding-bottom:20px;">
-        <div id="event-log"></div>
-      </div>
+      <button class="panel-toggle" onclick="toggleAnim('tactics')">⏸</button>
+      <canvas id="canvas-tactics"></canvas>
     </div>
 
   </div>
-</main>
+</div>
 
 <script>
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
+const API_BASE = 'https://messy-middle-backend-production.up.railway.app';
 
-let W, H;
-function resize() {
-  const area = canvas.parentElement;
-  W = canvas.width = area.clientWidth - 48;
-  H = canvas.height = area.clientHeight - 48;
+// ── Canvas setup ──────────────────────────────────────────────
+const panels = {
+  now:      { canvas: document.getElementById('canvas-now'),      ctx: null, W:0, H:0, users:[], frame:0, animating:true },
+  noaction: { canvas: document.getElementById('canvas-noaction'), ctx: null, W:0, H:0, users:[], frame:0, animating:true },
+  tactics:  { canvas: document.getElementById('canvas-tactics'),  ctx: null, W:0, H:0, users:[], frame:0, animating:true },
+};
+Object.values(panels).forEach(p => p.ctx = p.canvas.getContext('2d'));
+
+function resizeAll() {
+  Object.entries(panels).forEach(([id, p]) => {
+    const el = document.getElementById('panel-' + id);
+    p.W = p.canvas.width  = el.clientWidth;
+    p.H = p.canvas.height = el.clientHeight;
+  });
 }
-resize();
-window.addEventListener('resize', () => { resize(); });
+resizeAll();
+window.addEventListener('resize', resizeAll);
 
-// ── Messy Middle layout ──────────────────────────────────────
-// Two lobes: Explore (left) and Evaluate (right), connected loops
-// Trigger in the top center, Purchase funnel at the bottom center
+// ── Toggle animation ──────────────────────────────────────────
+function toggleAnim(id) {
+  const p = panels[id];
+  p.animating = !p.animating;
+  const btn = document.querySelector(`#panel-${id} .panel-toggle`);
+  btn.textContent = p.animating ? '⏸' : '▶';
+}
 
-function getLayout() {
+// ── Layout helper ─────────────────────────────────────────────
+function getLayout(W, H) {
   const cx = W / 2;
-  const cy = H / 2 - 20;
-  const lobeR = Math.min(W * 0.22, H * 0.32);
+  const cy = H / 2 - 10;
+  const lobeR = Math.min(W * 0.22, H * 0.30);
   return {
     cx, cy, lobeR,
-    explore: { x: cx - lobeR * 1.1, y: cy },
+    explore:  { x: cx - lobeR * 1.1, y: cy },
     evaluate: { x: cx + lobeR * 1.1, y: cy },
-    trigger: { x: cx, y: cy - lobeR * 0.9 },
-    purchase: { x: cx, y: cy + lobeR * 1.1 },
+    trigger:  { x: cx, y: cy - lobeR * 0.9 },
+    purchase: { x: cx, y: cy + lobeR * 1.0 },
   };
 }
 
-// ── Users ────────────────────────────────────────────────────
-const PHASES = ['exploring', 'evaluating', 'purchasing'];
-const users = [];
-let uidCounter = 0;
-
-const names = ['Luca','Sara','Marco','Giulia','Andrea','Chiara','Matteo','Anna','Francesco','Elena'];
-
-function randomName() {
-  return names[Math.floor(Math.random() * names.length)] + (Math.floor(Math.random()*90)+10);
+// ── Phase helpers ─────────────────────────────────────────────
+function phaseColor(p) {
+  if (p === 'exploring') return '#ffd600';
+  if (p === 'evaluating') return '#69f0ae';
+  return '#40c4ff';
+}
+function phaseLabel(p) {
+  if (p === 'exploring') return 'Exploration';
+  if (p === 'evaluating') return 'Evaluation';
+  return 'Purchase';
 }
 
-function phasePos(phase, index, total) {
-  const L = getLayout();
-  let base, angle, spread;
+function phasePos(phase, index, total, W, H) {
+  const L = getLayout(W, H);
   const i = index / Math.max(total, 1);
   if (phase === 'exploring') {
-    angle = (i * 2 - 1) * Math.PI * 0.65 + Math.PI;
-    return {
-      x: L.explore.x + Math.cos(angle) * L.lobeR * 0.72,
-      y: L.explore.y + Math.sin(angle) * L.lobeR * 0.55
-    };
+    const angle = (i * 2 - 1) * Math.PI * 0.65 + Math.PI;
+    return { x: L.explore.x + Math.cos(angle) * L.lobeR * 0.72, y: L.explore.y + Math.sin(angle) * L.lobeR * 0.55 };
   } else if (phase === 'evaluating') {
-    angle = (i * 2 - 1) * Math.PI * 0.65;
-    return {
-      x: L.evaluate.x + Math.cos(angle) * L.lobeR * 0.72,
-      y: L.evaluate.y + Math.sin(angle) * L.lobeR * 0.55
-    };
+    const angle = (i * 2 - 1) * Math.PI * 0.65;
+    return { x: L.evaluate.x + Math.cos(angle) * L.lobeR * 0.72, y: L.evaluate.y + Math.sin(angle) * L.lobeR * 0.55 };
   } else {
-    return {
-      x: L.purchase.x + (Math.random() - 0.5) * 60,
-      y: L.purchase.y + (Math.random() - 0.5) * 30
-    };
+    return { x: L.purchase.x + (Math.random()-0.5)*50, y: L.purchase.y + (Math.random()-0.5)*25 };
   }
 }
 
-function addUser(phase, fromTrigger) {
-  if (!phase) phase = Math.random() < 0.6 ? 'exploring' : 'evaluating';
-  const L = getLayout();
-
-  // Solo session_start e first_visit partono dal Trigger
-  // Gli altri appaiono direttamente nella loro fase
+// ── User factory ──────────────────────────────────────────────
+let uidCounter = 0;
+function createUser(phase, W, H, fromTrigger) {
+  const L = getLayout(W, H);
   const usesTrigger = fromTrigger === true;
   const startPos = usesTrigger
     ? { x: L.trigger.x + (Math.random()-0.5)*40, y: L.trigger.y - 20 }
-    : phasePos(phase, Math.floor(Math.random()*10), 10);
-
-  const u = {
+    : phasePos(phase, Math.floor(Math.random()*10), 10, W, H);
+  return {
     id: ++uidCounter,
-    name: randomName(),
     phase,
-    x: startPos.x,
-    y: startPos.y,
+    x: startPos.x, y: startPos.y,
     tx: startPos.x, ty: startPos.y,
     vx: 0, vy: 0,
-    r: 5 + Math.random() * 3,
+    r: 4 + Math.random() * 2.5,
     alpha: 0,
-    entering: true,
     wobble: Math.random() * Math.PI * 2,
-    wobbleSpeed: 0.006 + Math.random() * 0.008,
+    wobbleSpeed: 0.005 + Math.random() * 0.007,
     color: phaseColor(phase),
     phaseTime: 0,
-    nextMove: 60 + Math.random() * 180,
+    nextMove: 80 + Math.random() * 200,
     trail: [],
   };
-  users.push(u);
-  updateTargets();
-  logEvent(u.name + ' entered · ' + phaseLabel(phase), phaseColor(phase));
-  return u;
 }
 
-function phaseColor(p) {
-  if (p === 'exploring') return '#ffd600';   // giallo
-  if (p === 'evaluating') return '#69f0ae';  // verde
-  return '#40c4ff';                          // azzurro
-}
-function phaseLabel(p) {
-  if (p === 'exploring') return 'Esplorazione';
-  if (p === 'evaluating') return 'Valutazione';
-  return 'Acquisto';
-}
-
-function updateTargets() {
-  const counts = { exploring: 0, evaluating: 0, purchasing: 0 };
-  users.forEach(u => counts[u.phase]++);
-  const indices = { exploring: 0, evaluating: 0, purchasing: 0 };
-  users.forEach(u => {
+function updateTargets(panelId) {
+  const p = panels[panelId];
+  const counts = { exploring:0, evaluating:0, purchasing:0 };
+  p.users.forEach(u => counts[u.phase]++);
+  const indices = { exploring:0, evaluating:0, purchasing:0 };
+  p.users.forEach(u => {
     const idx = indices[u.phase]++;
-    const pos = phasePos(u.phase, idx, counts[u.phase]);
-    u.tx = pos.x + (Math.random()-0.5)*20;
-    u.ty = pos.y + (Math.random()-0.5)*20;
+    const pos = phasePos(u.phase, idx, counts[u.phase], p.W, p.H);
+    u.tx = pos.x + (Math.random()-0.5)*18;
+    u.ty = pos.y + (Math.random()-0.5)*18;
   });
 }
 
-function setPhase(u, newPhase) {
+function setPhase(u, newPhase, panelId) {
   if (u.phase === newPhase) return;
-  const old = u.phase;
   u.phase = newPhase;
   u.color = phaseColor(newPhase);
   u.phaseTime = 0;
-  updateTargets();
-  logEvent(u.name + ': ' + phaseLabel(old) + ' → ' + phaseLabel(newPhase), phaseColor(newPhase));
+  updateTargets(panelId);
 }
 
-// ── Trigger action ───────────────────────────────────────────
-function triggerAction(type) {
-  let from, to, count, msg;
-  if (type === 'explore→evaluate' || type === 'explore→evaluate-review') {
-    from = 'exploring'; to = 'evaluating';
-    msg = type === 'explore→evaluate' ? 'Comparazione prodotti attivata' : 'Social proof mostrata';
-  } else if (type === 'evaluate→purchase' || type === 'evaluate→purchase-scarcity') {
-    from = 'evaluating'; to = 'purchasing';
-    msg = type === 'evaluate→purchase' ? 'Urgency trigger attivato' : 'Scarcity trigger: ultimi pezzi';
-  } else {
-    from = 'evaluating'; to = 'exploring';
-    msg = 'Prodotti correlati mostrati';
-  }
-
-  const targets = users.filter(u => u.phase === from);
-  if (targets.length === 0) {
-    logEvent('Nessun utente in ' + phaseLabel(from), '#6b6b8a');
-    return;
-  }
-  // Move 40-70% of users in that phase
-  const n = Math.max(1, Math.floor(targets.length * (0.4 + Math.random() * 0.3)));
-  const shuffled = targets.sort(() => Math.random() - 0.5).slice(0, n);
-  shuffled.forEach(u => setPhase(u, to));
-  logEvent('⚡ ' + msg + ' · ' + n + ' utenti mossi', phaseColor(to));
+function addUserToPanel(panelId, phase, fromTrigger) {
+  const p = panels[panelId];
+  if (!phase) phase = Math.random() < 0.6 ? 'exploring' : 'evaluating';
+  const u = createUser(phase, p.W, p.H, fromTrigger);
+  p.users.push(u);
+  updateTargets(panelId);
+  return u;
 }
 
-// ── Log ──────────────────────────────────────────────────────
-function logEvent(msg, color) {
-  const log = document.getElementById('event-log');
-  if (!log) return;
-  const now = new Date();
-  const t = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0') + ':' + now.getSeconds().toString().padStart(2,'0');
-  const entry = document.createElement('div');
-  entry.className = 'log-entry';
-  entry.innerHTML = `<div class="log-dot" style="background:${color}"></div>
-    <div><span class="log-time">${t}</span><br><span class="log-msg">${msg}</span></div>`;
-  // Insert after title
-  const title = log.querySelector('.section-title');
-  log.insertBefore(entry, title ? title.nextSibling : log.firstChild);
-  // Keep max 20
-  while (log.querySelectorAll('.log-entry').length > 20) {
-    log.removeChild(log.lastChild);
-  }
+// ── Sync panel user counts ────────────────────────────────────
+function syncPanel(panelId, target, usersPerDot) {
+  const p = panels[panelId];
+  const UDOT = usersPerDot || 100;
+  const current = { exploring:0, evaluating:0, purchasing:0 };
+  p.users.forEach(u => current[u.phase]++);
+
+  ['exploring','evaluating','purchasing'].forEach(phase => {
+    const targetDots = Math.round((target[phase]||0) / UDOT);
+    const diff = targetDots - current[phase];
+    if (diff > 0) {
+      for (let i=0; i<diff; i++)
+        setTimeout(() => addUserToPanel(panelId, phase, phase==='exploring' && Math.random()<0.20), i*60);
+    } else if (diff < 0) {
+      let removed = 0;
+      for (let i=p.users.length-1; i>=0 && removed<Math.abs(diff); i--) {
+        if (p.users[i].phase === phase) { p.users.splice(i,1); removed++; }
+      }
+      updateTargets(panelId);
+    }
+  });
 }
 
-// ── Stats ────────────────────────────────────────────────────
-let realStats = null; // dati reali GA4
+// ── Draw messy middle on a canvas ────────────────────────────
+let globalFrame = 0;
 
-function updateStats() {
-  if (realStats) {
-    // Mostra numeri reali da GA4
-    document.getElementById('stat-exploring').textContent = realStats.exploring.toLocaleString('it-IT');
-    document.getElementById('stat-evaluating').textContent = realStats.evaluating.toLocaleString('it-IT');
-    document.getElementById('stat-purchasing').textContent = realStats.purchasing.toLocaleString('it-IT');
-  } else {
-    // Fallback: conta pallini simulati
-    const c = { exploring: 0, evaluating: 0, purchasing: 0 };
-    users.forEach(u => c[u.phase]++);
-    document.getElementById('stat-exploring').textContent = c.exploring;
-    document.getElementById('stat-evaluating').textContent = c.evaluating;
-    document.getElementById('stat-purchasing').textContent = c.purchasing;
-  }
-}
+function drawMessyMiddle(p, opts) {
+  const { ctx, W, H, users, frame } = p;
+  const { heatData, showHeat } = opts || {};
 
-// ── Draw ─────────────────────────────────────────────────────
-let frame = 0;
-
-function drawBackground() {
   ctx.fillStyle = '#0a0a0f';
   ctx.fillRect(0, 0, W, H);
-}
 
-function drawSchema() {
-  const L = getLayout();
+  const L = getLayout(W, H);
   const r = L.lobeR;
-  const ALERT_THRESHOLD = 0.60; // bounce rate critico
+  const ALERT = 0.60;
 
-  // ── Heatmap data per fase ──
   function getHeat(phase) {
-    if (!pageData || !pageData.phase_breakdown) return { bounce: 0, intensity: 0, alert: false };
-    const d = pageData.phase_breakdown[phase];
-    if (!d) return { bounce: 0, intensity: 0, alert: false };
+    if (!showHeat || !heatData || !heatData.phase_breakdown) return { bounce:0, intensity:0, alert:false };
+    const d = heatData.phase_breakdown[phase];
+    if (!d) return { bounce:0, intensity:0, alert:false };
     const bounce = d.avg_bounce_rate || 0;
-    const intensity = Math.min(1, bounce / ALERT_THRESHOLD); // 0→1
-    return { bounce, intensity, alert: bounce >= ALERT_THRESHOLD };
+    return { bounce, intensity: Math.min(1, bounce/ALERT), alert: bounce >= ALERT };
   }
 
-  // ── drawLobe con heatmap ──
   function drawLobe(x, y, color, label, phase) {
     const heat = getHeat(phase);
-
-    // Glow base (colore fase)
-    const glowBase = ctx.createRadialGradient(x, y, 0, x, y, r * 1.3);
-    glowBase.addColorStop(0, color + '18');
-    glowBase.addColorStop(1, 'transparent');
-    ctx.fillStyle = glowBase;
-    ctx.beginPath();
-    ctx.arc(x, y, r * 1.3, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Heatmap overlay — dal verde al rosso in base al bounce rate
+    // Base glow
+    const g = ctx.createRadialGradient(x,y,0,x,y,r*1.3);
+    g.addColorStop(0, color+'18'); g.addColorStop(1,'transparent');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x,y,r*1.3,0,Math.PI*2); ctx.fill();
+    // Heat overlay
     if (heat.intensity > 0) {
-      const heatColor = heat.alert
-        ? `rgba(255,82,82,${(heat.intensity * 0.18).toFixed(2)})`
-        : `rgba(255,193,7,${(heat.intensity * 0.12).toFixed(2)})`;
-      const glowHeat = ctx.createRadialGradient(x, y, 0, x, y, r * 1.2);
-      glowHeat.addColorStop(0, heatColor);
-      glowHeat.addColorStop(1, 'transparent');
-      ctx.fillStyle = glowHeat;
-      ctx.beginPath();
-      ctx.arc(x, y, r * 1.2, 0, Math.PI * 2);
-      ctx.fill();
+      const hc = heat.alert
+        ? `rgba(255,82,82,${(heat.intensity*0.18).toFixed(2)})`
+        : `rgba(255,193,7,${(heat.intensity*0.12).toFixed(2)})`;
+      const gh = ctx.createRadialGradient(x,y,0,x,y,r*1.2);
+      gh.addColorStop(0, hc); gh.addColorStop(1,'transparent');
+      ctx.fillStyle = gh;
+      ctx.beginPath(); ctx.arc(x,y,r*1.2,0,Math.PI*2); ctx.fill();
     }
-
-    // Alert ring pulsante
+    // Alert ring
     if (heat.alert) {
-      const pulse = 0.5 + 0.5 * Math.sin(frame * 0.06);
-      ctx.beginPath();
-      ctx.arc(x, y, r * 1.1 + pulse * 6, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(255,82,82,0.5)';
-      ctx.lineWidth = 1.5;
-      ctx.globalAlpha = 0.6 * pulse;
-      ctx.stroke();
-      ctx.globalAlpha = 1;
+      const pulse = 0.5 + 0.5*Math.sin(frame*0.06);
+      ctx.beginPath(); ctx.arc(x,y,r*1.1+pulse*6,0,Math.PI*2);
+      ctx.strokeStyle='rgba(255,82,82,0.5)'; ctx.lineWidth=1.5;
+      ctx.globalAlpha=0.6*pulse; ctx.stroke(); ctx.globalAlpha=1;
     }
-
-    // Lobe circle — più spesso se in alert
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
+    // Circle
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
     ctx.strokeStyle = heat.alert ? '#ff5252' : color;
     ctx.lineWidth = heat.alert ? 2 : 1.5;
     ctx.globalAlpha = heat.alert ? 0.7 : 0.35;
-    ctx.stroke();
-    ctx.globalAlpha = 1;
-
+    ctx.stroke(); ctx.globalAlpha=1;
     // Inner ring
-    ctx.beginPath();
-    ctx.arc(x, y, r * 0.55, 0, Math.PI * 2);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 0.5;
-    ctx.globalAlpha = 0.15;
-    ctx.stroke();
-    ctx.globalAlpha = 1;
-
+    ctx.beginPath(); ctx.arc(x,y,r*0.55,0,Math.PI*2);
+    ctx.strokeStyle=color; ctx.lineWidth=0.5; ctx.globalAlpha=0.15;
+    ctx.stroke(); ctx.globalAlpha=1;
     // Label
-    ctx.font = '500 11px "DM Mono", monospace';
-    ctx.fillStyle = heat.alert ? '#ff5252' : color;
-    ctx.globalAlpha = 0.85;
-    ctx.textAlign = 'center';
-    ctx.fillText(label.toUpperCase(), x, y - r - 12);
-    ctx.globalAlpha = 1;
-
-    // Bounce rate sotto la label
-    if (heat.bounce > 0) {
-      const bounceLabel = `bounce ${(heat.bounce * 100).toFixed(0)}%`;
-      ctx.font = '400 9px "DM Mono", monospace';
-      ctx.fillStyle = heat.alert ? '#ff5252' : 'rgba(255,255,255,0.35)';
-      ctx.globalAlpha = 1;
-      ctx.fillText(bounceLabel, x, y - r - 1);
+    ctx.font='500 10px "DM Mono"'; ctx.fillStyle=heat.alert?'#ff5252':color;
+    ctx.globalAlpha=0.85; ctx.textAlign='center';
+    ctx.fillText(label.toUpperCase(), x, y-r-10); ctx.globalAlpha=1;
+    // Bounce
+    if (heat.bounce>0) {
+      ctx.font='400 8px "DM Mono"';
+      ctx.fillStyle=heat.alert?'#ff5252':'rgba(255,255,255,0.3)';
+      ctx.fillText(`bounce ${(heat.bounce*100).toFixed(0)}%`, x, y-r);
     }
   }
 
   drawLobe(L.explore.x, L.explore.y, '#ffd600', 'Exploration', 'exploring');
   drawLobe(L.evaluate.x, L.evaluate.y, '#69f0ae', 'Evaluation', 'evaluating');
 
-  // ── Connecting path (the "messy" loop between lobes) ──
-  ctx.beginPath();
-  // Top arc connecting via trigger
-  ctx.moveTo(L.explore.x, L.explore.y - r);
-  ctx.bezierCurveTo(
-    L.explore.x + r*0.5, L.explore.y - r*1.5,
-    L.trigger.x - r*0.6, L.trigger.y + r*0.3,
-    L.trigger.x, L.trigger.y
-  );
-  ctx.bezierCurveTo(
-    L.trigger.x + r*0.6, L.trigger.y + r*0.3,
-    L.evaluate.x - r*0.5, L.evaluate.y - r*1.5,
-    L.evaluate.x, L.evaluate.y - r
-  );
-  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
+  // Connecting arcs
+  function arc(x1,y1,cp1x,cp1y,cp2x,cp2y,x2,y2) {
+    ctx.beginPath(); ctx.moveTo(x1,y1);
+    ctx.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,x2,y2);
+    ctx.strokeStyle='rgba(255,255,255,0.07)'; ctx.lineWidth=1; ctx.stroke();
+  }
+  arc(L.explore.x, L.explore.y-r, L.explore.x+r*.5, L.explore.y-r*1.5, L.trigger.x-r*.6, L.trigger.y+r*.3, L.trigger.x, L.trigger.y);
+  arc(L.trigger.x, L.trigger.y, L.trigger.x+r*.6, L.trigger.y+r*.3, L.evaluate.x-r*.5, L.evaluate.y-r*1.5, L.evaluate.x, L.evaluate.y-r);
+  arc(L.explore.x, L.explore.y+r, L.explore.x+r*.5, L.explore.y+r*1.5, L.purchase.x-r*.6, L.purchase.y-r*.3, L.purchase.x, L.purchase.y);
+  arc(L.purchase.x, L.purchase.y, L.purchase.x+r*.6, L.purchase.y-r*.3, L.evaluate.x-r*.5, L.evaluate.y+r*1.5, L.evaluate.x, L.evaluate.y+r);
 
-  // Bottom arc connecting via purchase
-  ctx.beginPath();
-  ctx.moveTo(L.explore.x, L.explore.y + r);
-  ctx.bezierCurveTo(
-    L.explore.x + r*0.5, L.explore.y + r*1.5,
-    L.purchase.x - r*0.6, L.purchase.y - r*0.3,
-    L.purchase.x, L.purchase.y
-  );
-  ctx.bezierCurveTo(
-    L.purchase.x + r*0.6, L.purchase.y - r*0.3,
-    L.evaluate.x - r*0.5, L.evaluate.y + r*1.5,
-    L.evaluate.x, L.evaluate.y + r
-  );
-  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  // Cross-connections (messy middle arrows)
-  function drawArrow(x1, y1, x2, y2, color) {
+  // Cross arrows
+  for (let i=0; i<4; i++) {
+    const t = i/3;
     ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 0.8;
-    ctx.globalAlpha = 0.2;
-    ctx.stroke();
-    ctx.globalAlpha = 1;
-  }
-  // Multiple cross-arrows showing the "messy" oscillation
-  for (let i = 0; i < 5; i++) {
-    const t = i / 4;
-    const px = L.explore.x + r*0.6;
-    const py = L.explore.y + (t-0.5)*r*1.2;
-    const qx = L.evaluate.x - r*0.6;
-    const qy = L.evaluate.y + (t-0.5)*r*1.2;
-    drawArrow(px, py, qx, qy, i % 2 === 0 ? '#4fc3f7' : '#f06292');
+    ctx.moveTo(L.explore.x+r*.6, L.explore.y+(t-.5)*r*1.1);
+    ctx.lineTo(L.evaluate.x-r*.6, L.evaluate.y+(t-.5)*r*1.1);
+    ctx.strokeStyle = i%2===0?'rgba(255,214,0,0.15)':'rgba(105,240,174,0.15)';
+    ctx.lineWidth=0.8; ctx.stroke();
   }
 
-  // ── Trigger node ──
-  const trigPulse = 0.7 + 0.3 * Math.sin(frame * 0.05);
-  ctx.beginPath();
-  ctx.arc(L.trigger.x, L.trigger.y, 16 * trigPulse, 0, Math.PI*2);
-  ctx.strokeStyle = 'rgba(244,143,177,0.4)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.arc(L.trigger.x, L.trigger.y, 8, 0, Math.PI*2);
-  ctx.fillStyle = '#f48fb1';
-  ctx.globalAlpha = 0.9;
-  ctx.fill();
-  ctx.globalAlpha = 1;
-  ctx.font = '500 10px "DM Mono"';
-  ctx.fillStyle = 'rgba(244,143,177,0.9)';
-  ctx.textAlign = 'center';
-  ctx.fillText('TRIGGER', L.trigger.x, L.trigger.y - 24);
-  ctx.fillText('(entry point)', L.trigger.x, L.trigger.y - 12);
+  // Trigger node
+  const tp = 0.7+0.3*Math.sin(frame*0.05);
+  ctx.beginPath(); ctx.arc(L.trigger.x,L.trigger.y,14*tp,0,Math.PI*2);
+  ctx.strokeStyle='rgba(244,143,177,0.35)'; ctx.lineWidth=1; ctx.stroke();
+  ctx.beginPath(); ctx.arc(L.trigger.x,L.trigger.y,7,0,Math.PI*2);
+  ctx.fillStyle='#f48fb1'; ctx.globalAlpha=0.9; ctx.fill(); ctx.globalAlpha=1;
+  ctx.font='500 9px "DM Mono"'; ctx.fillStyle='rgba(244,143,177,0.8)'; ctx.textAlign='center';
+  ctx.fillText('TRIGGER', L.trigger.x, L.trigger.y-18);
+  ctx.fillText('(entry point)', L.trigger.x, L.trigger.y-8);
 
-  // ── Purchase node ──
-  const purHeat = (() => {
-    if (!pageData || !pageData.phase_breakdown) return { bounce: 0, alert: false, intensity: 0 };
-    const d = pageData.phase_breakdown['purchasing'];
-    if (!d) return { bounce: 0, alert: false, intensity: 0 };
-    const bounce = d.avg_bounce_rate || 0;
-    return { bounce, alert: bounce >= 0.60, intensity: Math.min(1, bounce / 0.60) };
-  })();
-
+  // Purchase node
+  const purHeat = getHeat('purchasing');
   const purColor = purHeat.alert ? '#ff5252' : '#40c4ff';
-  const purPulse = 0.7 + 0.3 * Math.sin(frame * 0.04 + 1);
-
-  // Heatmap glow attorno al nodo
-  if (purHeat.intensity > 0) {
-    const heatGlow = ctx.createRadialGradient(L.purchase.x, L.purchase.y, 0, L.purchase.x, L.purchase.y, 60);
-    heatGlow.addColorStop(0, purHeat.alert
-      ? `rgba(255,82,82,${(purHeat.intensity * 0.25).toFixed(2)})`
-      : `rgba(255,193,7,${(purHeat.intensity * 0.15).toFixed(2)})`);
-    heatGlow.addColorStop(1, 'transparent');
-    ctx.fillStyle = heatGlow;
-    ctx.beginPath();
-    ctx.arc(L.purchase.x, L.purchase.y, 60, 0, Math.PI * 2);
-    ctx.fill();
+  const pp = 0.7+0.3*Math.sin(frame*0.04+1);
+  if (purHeat.intensity>0) {
+    const pg = ctx.createRadialGradient(L.purchase.x,L.purchase.y,0,L.purchase.x,L.purchase.y,50);
+    pg.addColorStop(0, purHeat.alert?`rgba(255,82,82,${(purHeat.intensity*.25).toFixed(2)})`:`rgba(255,193,7,${(purHeat.intensity*.15).toFixed(2)})`);
+    pg.addColorStop(1,'transparent');
+    ctx.fillStyle=pg; ctx.beginPath(); ctx.arc(L.purchase.x,L.purchase.y,50,0,Math.PI*2); ctx.fill();
   }
-
-  // Alert ring pulsante
   if (purHeat.alert) {
-    const alertPulse = 0.5 + 0.5 * Math.sin(frame * 0.06);
-    ctx.beginPath();
-    ctx.arc(L.purchase.x, L.purchase.y, 28 + alertPulse * 8, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(255,82,82,0.6)';
-    ctx.lineWidth = 1.5;
-    ctx.globalAlpha = 0.7 * alertPulse;
-    ctx.stroke();
-    ctx.globalAlpha = 1;
+    const ap=0.5+0.5*Math.sin(frame*0.06);
+    ctx.beginPath(); ctx.arc(L.purchase.x,L.purchase.y,24+ap*6,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,82,82,0.6)'; ctx.lineWidth=1.5;
+    ctx.globalAlpha=0.7*ap; ctx.stroke(); ctx.globalAlpha=1;
+  }
+  ctx.beginPath(); ctx.arc(L.purchase.x,L.purchase.y,16*pp,0,Math.PI*2);
+  ctx.strokeStyle=purHeat.alert?'rgba(255,82,82,0.4)':'rgba(64,196,255,0.3)'; ctx.lineWidth=1; ctx.stroke();
+  ctx.beginPath(); ctx.arc(L.purchase.x,L.purchase.y,8,0,Math.PI*2);
+  ctx.fillStyle=purColor; ctx.globalAlpha=0.9; ctx.fill(); ctx.globalAlpha=1;
+  ctx.font='500 9px "DM Mono"'; ctx.fillStyle=purHeat.alert?'rgba(255,82,82,0.9)':'rgba(64,196,255,0.9)';
+  ctx.textAlign='center'; ctx.fillText('PURCHASE',L.purchase.x,L.purchase.y+22);
+  if (purHeat.bounce>0) {
+    ctx.font='400 8px "DM Mono"';
+    ctx.fillStyle=purHeat.alert?'#ff5252':'rgba(255,255,255,0.3)';
+    ctx.fillText(`abandon ${(purHeat.bounce*100).toFixed(0)}%`,L.purchase.x,L.purchase.y+32);
   }
 
-  // Outer pulse ring
-  ctx.beginPath();
-  ctx.arc(L.purchase.x, L.purchase.y, 20 * purPulse, 0, Math.PI * 2);
-  ctx.strokeStyle = purHeat.alert ? 'rgba(255,82,82,0.4)' : 'rgba(64,196,255,0.3)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  // Core dot
-  ctx.beginPath();
-  ctx.arc(L.purchase.x, L.purchase.y, 10, 0, Math.PI * 2);
-  ctx.fillStyle = purColor;
-  ctx.globalAlpha = 0.9;
-  ctx.fill();
-  ctx.globalAlpha = 1;
-
-  // Label
-  ctx.font = '500 10px "DM Mono"';
-  ctx.fillStyle = purHeat.alert ? 'rgba(255,82,82,0.9)' : 'rgba(64,196,255,0.9)';
-  ctx.textAlign = 'center';
-  ctx.fillText('PURCHASE', L.purchase.x, L.purchase.y + 26);
-
-  // Bounce rate
-  if (purHeat.bounce > 0) {
-    ctx.font = '400 9px "DM Mono"';
-    ctx.fillStyle = purHeat.alert ? '#ff5252' : 'rgba(255,255,255,0.35)';
-    ctx.fillText(`bounce ${(purHeat.bounce * 100).toFixed(0)}%`, L.purchase.x, L.purchase.y + 38);
-  }
-}
-
-function drawUsers() {
+  // Users
   users.forEach(u => {
-    // Trail
-    if (u.trail.length > 1) {
-      ctx.beginPath();
-      ctx.moveTo(u.trail[0].x, u.trail[0].y);
-      u.trail.forEach(p => ctx.lineTo(p.x, p.y));
-      ctx.strokeStyle = u.color;
-      ctx.lineWidth = 1;
-      ctx.globalAlpha = 0.08;
-      ctx.stroke();
-      ctx.globalAlpha = 1;
+    if (u.trail.length>1) {
+      ctx.beginPath(); ctx.moveTo(u.trail[0].x,u.trail[0].y);
+      u.trail.forEach(pt=>ctx.lineTo(pt.x,pt.y));
+      ctx.strokeStyle=u.color; ctx.lineWidth=1; ctx.globalAlpha=0.07; ctx.stroke(); ctx.globalAlpha=1;
     }
-
-    // Glow
-    const glow = ctx.createRadialGradient(u.x, u.y, 0, u.x, u.y, u.r*3.5);
-    glow.addColorStop(0, u.color + '55');
-    glow.addColorStop(1, 'transparent');
-    ctx.fillStyle = glow;
-    ctx.globalAlpha = u.alpha;
-    ctx.beginPath();
-    ctx.arc(u.x, u.y, u.r*3.5, 0, Math.PI*2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-
-    // Dot
-    ctx.beginPath();
-    ctx.arc(u.x, u.y, u.r, 0, Math.PI*2);
-    ctx.fillStyle = u.color;
-    ctx.globalAlpha = u.alpha;
-    ctx.fill();
-    ctx.globalAlpha = 1;
-
-    // Ring
-    ctx.beginPath();
-    ctx.arc(u.x, u.y, u.r + 2, 0, Math.PI*2);
-    ctx.strokeStyle = u.color;
-    ctx.lineWidth = 0.8;
-    ctx.globalAlpha = u.alpha * 0.4;
-    ctx.stroke();
-    ctx.globalAlpha = 1;
+    const gw = ctx.createRadialGradient(u.x,u.y,0,u.x,u.y,u.r*3);
+    gw.addColorStop(0,u.color+'44'); gw.addColorStop(1,'transparent');
+    ctx.fillStyle=gw; ctx.globalAlpha=u.alpha;
+    ctx.beginPath(); ctx.arc(u.x,u.y,u.r*3,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1;
+    ctx.beginPath(); ctx.arc(u.x,u.y,u.r,0,Math.PI*2);
+    ctx.fillStyle=u.color; ctx.globalAlpha=u.alpha; ctx.fill(); ctx.globalAlpha=1;
+    ctx.beginPath(); ctx.arc(u.x,u.y,u.r+1.5,0,Math.PI*2);
+    ctx.strokeStyle=u.color; ctx.lineWidth=0.7; ctx.globalAlpha=u.alpha*0.35; ctx.stroke(); ctx.globalAlpha=1;
   });
 }
 
-function updateUsers() {
-  frame++;
-  const L = getLayout();
+// ── Update users physics ──────────────────────────────────────
+function updatePanelUsers(panelId, transProbs) {
+  const p = panels[panelId];
+  if (!p.animating) return;
+  p.frame++;
 
-  users.forEach((u, i) => {
-    // Fade in
-    if (u.alpha < 1) u.alpha = Math.min(1, u.alpha + 0.04);
-
-    // Wobble
+  p.users.forEach((u, i) => {
+    if (u.alpha < 1) u.alpha = Math.min(1, u.alpha+0.04);
     u.wobble += u.wobbleSpeed;
     u.phaseTime++;
+    const dx = u.tx-u.x, dy = u.ty-u.y;
+    u.vx = u.vx*0.88 + dx*0.009 + Math.cos(u.wobble)*0.18;
+    u.vy = u.vy*0.88 + dy*0.009 + Math.sin(u.wobble*0.7)*0.18;
+    u.x += u.vx; u.y += u.vy;
+    u.trail.push({x:u.x,y:u.y});
+    if (u.trail.length>16) u.trail.shift();
 
-    // Move toward target with gentle wobble
-    const dx = u.tx - u.x;
-    const dy = u.ty - u.y;
-    u.vx = u.vx * 0.88 + dx * 0.009 + Math.cos(u.wobble) * 0.2;
-    u.vy = u.vy * 0.88 + dy * 0.009 + Math.sin(u.wobble * 0.7) * 0.2;
-    u.x += u.vx;
-    u.y += u.vy;
-
-    // Trail
-    u.trail.push({ x: u.x, y: u.y });
-    if (u.trail.length > 18) u.trail.shift();
-
-    // Auto-transition logic
     u.nextMove--;
-    if (u.nextMove <= 0) {
-      u.nextMove = 120 + Math.random() * 300;
+    if (u.nextMove<=0) {
+      u.nextMove = 100 + Math.random()*250;
       const r = Math.random();
-      if (u.phase === 'exploring') {
-        if (r < 0.45) setPhase(u, 'evaluating');
-      } else if (u.phase === 'evaluating') {
-        if (r < 0.15) setPhase(u, 'purchasing');
-        else if (r < 0.35) setPhase(u, 'exploring');
-      } else if (u.phase === 'purchasing') {
-        // remove user after a while
-        if (r < 0.4) {
-          logEvent(u.name + ' ha completato l\'acquisto ✓', '#ffe082');
-          users.splice(i, 1);
-          updateTargets();
+      const t = transProbs || transitions;
+      if (u.phase==='exploring') {
+        if (r < t.explore_to_evaluate) setPhase(u,'evaluating',panelId);
+      } else if (u.phase==='evaluating') {
+        if (r < t.evaluate_to_purchase) setPhase(u,'purchasing',panelId);
+        else if (r < t.evaluate_to_purchase + t.evaluate_to_explore) setPhase(u,'exploring',panelId);
+      } else if (u.phase==='purchasing') {
+        if (r < t.purchase_complete) {
+          p.users.splice(i,1); updateTargets(panelId);
+        } else if (r < t.purchase_complete + t.purchase_to_evaluate) {
+          setPhase(u,'evaluating',panelId);
         }
       }
     }
   });
 }
 
-function loop() {
-  drawBackground();
-  drawSchema();
-  drawUsers();
-  updateUsers();
-  updateStats();
-  requestAnimationFrame(loop);
-}
-
-// ── GA4 Integration ───────────────────────────────────────────
-const API_BASE = 'https://messy-middle-backend-production.up.railway.app';
-
-// Probabilità di transizione — aggiornate da GA4 ogni 24h
+// ── GA4 data ──────────────────────────────────────────────────
 let transitions = {
-  explore_to_evaluate:  0.38,  // default dal funnel iniziale
+  explore_to_evaluate:  0.38,
   evaluate_to_purchase: 0.09,
   evaluate_to_explore:  0.20,
   purchase_complete:    0.52,
   purchase_to_evaluate: 0.20,
 };
+let pageData = null;
+let realStats = null;
+let ga4Connected = false;
+
+// Transitions for "no action" = trend peggiorativo (-10% su ogni metrica positiva)
+function getNoActionTransitions() {
+  return {
+    explore_to_evaluate:  Math.max(0.01, transitions.explore_to_evaluate  * 0.90),
+    evaluate_to_purchase: Math.max(0.01, transitions.evaluate_to_purchase * 0.90),
+    evaluate_to_explore:  Math.min(0.99, transitions.evaluate_to_explore  * 1.10),
+    purchase_complete:    Math.max(0.01, transitions.purchase_complete    * 0.90),
+    purchase_to_evaluate: Math.min(0.99, transitions.purchase_to_evaluate * 1.10),
+  };
+}
+
+// Transitions for "with tactics" = ottimistico (+20% su metriche positive)
+let tacticsBoost = {
+  explore_to_evaluate:  1.0,
+  evaluate_to_purchase: 1.0,
+  evaluate_to_explore:  1.0,
+  purchase_complete:    1.0,
+  purchase_to_evaluate: 1.0,
+};
+
+function getTacticsTransitions() {
+  return {
+    explore_to_evaluate:  Math.min(0.99, transitions.explore_to_evaluate  * tacticsBoost.explore_to_evaluate),
+    evaluate_to_purchase: Math.min(0.99, transitions.evaluate_to_purchase * tacticsBoost.evaluate_to_purchase),
+    evaluate_to_explore:  Math.max(0.01, transitions.evaluate_to_explore  / tacticsBoost.evaluate_to_explore),
+    purchase_complete:    Math.min(0.99, transitions.purchase_complete    * tacticsBoost.purchase_complete),
+    purchase_to_evaluate: Math.max(0.01, transitions.purchase_to_evaluate / tacticsBoost.purchase_to_evaluate),
+  };
+}
+
+// Nudge tactics update tactics boost
+const TACTICS_BOOSTS = {
+  'explore→evaluate':        { explore_to_evaluate: 1.20 },
+  'explore→evaluate-review': { explore_to_evaluate: 1.15 },
+  'evaluate→purchase':       { evaluate_to_purchase: 1.25, evaluate_to_explore: 0.85 },
+  'evaluate→purchase-scarcity': { evaluate_to_purchase: 1.20 },
+  'evaluate→explore':        { evaluate_to_explore: 0.80 },
+};
+
+let activeTactics = new Set();
+
+function triggerAction(type) {
+  // Toggle tactic on/off for tactics panel
+  if (activeTactics.has(type)) {
+    activeTactics.delete(type);
+    logEvent(`Tactic removed: ${type}`, '#6b6b8a');
+  } else {
+    activeTactics.add(type);
+    logEvent(`⚡ Tactic active: ${type}`, '#69f0ae');
+  }
+  // Recompute tacticsBoost
+  tacticsBoost = { explore_to_evaluate:1, evaluate_to_purchase:1, evaluate_to_explore:1, purchase_complete:1, purchase_to_evaluate:1 };
+  activeTactics.forEach(t => {
+    const b = TACTICS_BOOSTS[t] || {};
+    Object.keys(b).forEach(k => { if (tacticsBoost[k]) tacticsBoost[k] *= b[k]; else tacticsBoost[k] = b[k]; });
+  });
+  // Also apply to NOW panel (visual only)
+  const targets = panels.now.users.filter(u => {
+    if (type.startsWith('explore')) return u.phase==='exploring';
+    return u.phase==='evaluating';
+  });
+  const n = Math.max(1, Math.floor(targets.length*(0.4+Math.random()*0.3)));
+  targets.sort(()=>Math.random()-.5).slice(0,n).forEach(u => {
+    const dest = type.includes('→purchase') ? 'purchasing' : type.includes('→evaluate') ? 'evaluating' : 'exploring';
+    setPhase(u, dest, 'now');
+  });
+}
+
+// ── Log ───────────────────────────────────────────────────────
+function logEvent(msg, color) {
+  const log = document.getElementById('event-log');
+  if (!log) return;
+  const now = new Date();
+  const t = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0')+':'+now.getSeconds().toString().padStart(2,'0');
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.innerHTML = `<div class="log-dot" style="background:${color}"></div><div><span class="log-time">${t}</span><br><span class="log-msg">${msg}</span></div>`;
+  log.insertBefore(entry, log.firstChild);
+  while (log.querySelectorAll('.log-entry').length > 20) log.removeChild(log.lastChild);
+}
+
+// ── Stats ─────────────────────────────────────────────────────
+function updateStats() {
+  if (realStats) {
+    document.getElementById('stat-exploring').textContent  = realStats.exploring.toLocaleString('it-IT');
+    document.getElementById('stat-evaluating').textContent = realStats.evaluating.toLocaleString('it-IT');
+    document.getElementById('stat-purchasing').textContent = realStats.purchasing.toLocaleString('it-IT');
+  }
+}
+
+// ── Toggle sections ───────────────────────────────────────────
+function toggleSection(id) {
+  document.getElementById('body-'+id).classList.toggle('open');
+  document.getElementById('arrow-'+id).classList.toggle('open');
+}
+
+// ── Funnel UI ─────────────────────────────────────────────────
+function updateFunnelUI(t) {
+  const set = (id, barId, val) => {
+    const el = document.getElementById(id), bar = document.getElementById(barId);
+    if (el) el.textContent = (val*100).toFixed(1)+'%';
+    if (bar) bar.style.width = Math.min(100, val*100)+'%';
+  };
+  set('pct-e2v','bar-e2v', t.explore_to_evaluate);
+  set('pct-v2p','bar-v2p', t.evaluate_to_purchase);
+  set('pct-v2e','bar-v2e', t.evaluate_to_explore);
+  set('pct-pc', 'bar-pc',  t.purchase_complete);
+}
+
+function updateBounceUI(data) {
+  if (!data||!data.phase_breakdown) return;
+  const set = (id, barId, val) => {
+    const alert = val>=0.60;
+    const el=document.getElementById(id), bar=document.getElementById(barId);
+    if (el) { el.textContent=(val*100).toFixed(0)+'%'; el.style.color=alert?'#ff5252':''; }
+    if (bar) { bar.style.width=Math.min(100,val*100)+'%'; bar.style.background=alert?'#ff5252':''; }
+  };
+  const pb = data.phase_breakdown;
+  if (pb.exploring)  set('pct-br-exp','bar-br-exp', pb.exploring.avg_bounce_rate||0);
+  if (pb.evaluating) set('pct-br-eva','bar-br-eva', pb.evaluating.avg_bounce_rate||0);
+  if (pb.purchasing) set('pct-br-pur','bar-br-pur', pb.purchasing.avg_bounce_rate||0);
+}
+
+// ── Connection status ─────────────────────────────────────────
+function setConnectionStatus(ok, msg) {
+  const badge = document.querySelector('.live-badge');
+  const dot = badge.querySelector('.live-dot');
+  const label = document.getElementById('conn-label');
+  if (ok) {
+    dot.style.background='#a5d6a7'; dot.style.animation='pulse 1.4s infinite';
+    label.textContent='GA4 Live'; badge.style.color='#a5d6a7';
+  } else {
+    dot.style.background='#ff9800'; dot.style.animation='none';
+    label.textContent=msg; badge.style.color='#ff9800';
+  }
+}
+
+// ── GA4 fetch ─────────────────────────────────────────────────
+async function fetchGA4() {
+  try {
+    const res = await fetch(`${API_BASE}/api/realtime`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    if (!ga4Connected) { ga4Connected=true; setConnectionStatus(true); logEvent('✓ Connected to GA4','#a5d6a7'); }
+    realStats = { exploring: data.phases.exploring||0, evaluating: data.phases.evaluating||0, purchasing: data.phases.purchasing||0 };
+    updateStats();
+    // Sync NOW panel
+    syncPanel('now', data.phases, 100);
+    // Sync projection panels with projected counts
+    const noact = getNoActionTransitions();
+    const tact  = getTacticsTransitions();
+    // Project 7 days: scale by ratio of projected conversion
+    const projNoAction = {
+      exploring:  Math.round((data.phases.exploring||0)  * (noact.explore_to_evaluate / transitions.explore_to_evaluate * 0.9)),
+      evaluating: Math.round((data.phases.evaluating||0) * (noact.evaluate_to_purchase / transitions.evaluate_to_purchase * 0.9)),
+      purchasing: Math.round((data.phases.purchasing||0) * (noact.purchase_complete / transitions.purchase_complete * 0.85)),
+    };
+    const projTactics = {
+      exploring:  Math.round((data.phases.exploring||0)  * 1.05),
+      evaluating: Math.round((data.phases.evaluating||0) * (tact.explore_to_evaluate / transitions.explore_to_evaluate)),
+      purchasing: Math.round((data.phases.purchasing||0) * (tact.evaluate_to_purchase / transitions.evaluate_to_purchase)),
+    };
+    syncPanel('noaction', projNoAction, 100);
+    syncPanel('tactics',  projTactics,  100);
+    logEvent(`GA4: ${(data.phases.exploring||0).toLocaleString('it-IT')} exploring · ${(data.phases.evaluating||0).toLocaleString('it-IT')} evaluating · ${(data.phases.purchasing||0).toLocaleString('it-IT')} purchasing`, '#6b6b8a');
+  } catch(e) {
+    setConnectionStatus(false,'Simulation');
+    if (ga4Connected) { ga4Connected=false; logEvent('⚠ GA4 unreachable · simulation mode','#ffe082'); }
+  }
+}
 
 async function fetchFunnel() {
   try {
@@ -984,28 +870,9 @@ async function fetchFunnel() {
     if (data.transitions) {
       transitions = data.transitions;
       updateFunnelUI(transitions);
-      logEvent(
-        `Funnel updated · Explore→Eval: ${(transitions.explore_to_evaluate*100).toFixed(1)}% · Eval→Purchase: ${(transitions.evaluate_to_purchase*100).toFixed(1)}%`,
-        '#6b6b8a'
-      );
+      logEvent(`Funnel updated · E→V: ${(transitions.explore_to_evaluate*100).toFixed(1)}% · V→P: ${(transitions.evaluate_to_purchase*100).toFixed(1)}%`,'#6b6b8a');
     }
   } catch(e) {}
-}
-let ga4Connected = false;
-let lastGA4Data = null;
-let pageData = null; // dati heatmap per fase
-
-// Indicatore connessione nell'header
-function setConnectionStatus(ok, msg) {
-  const badge = document.querySelector('.live-badge');
-  if (ok) {
-    badge.innerHTML = `<div class="live-dot" style="background:#a5d6a7"></div> GA4 Live`;
-    badge.style.color = '#a5d6a7';
-  } else {
-    const isConnecting = msg === 'Connecting...';
-    badge.innerHTML = `<div class="live-dot" style="background:#ff9800;animation:none"></div> ${msg}`;
-    badge.style.color = '#ff9800';
-  }
 }
 
 async function fetchPages() {
@@ -1014,162 +881,46 @@ async function fetchPages() {
     if (!res.ok) return;
     const data = await res.json();
     pageData = data;
-    checkAlerts(data);
     updateBounceUI(data);
+    // Alerts
+    if (data.phase_breakdown) {
+      Object.entries(data.phase_breakdown).forEach(([phase,d]) => {
+        const b = d.avg_bounce_rate||0;
+        if (b>=0.60) logEvent(`⚠ ${phaseLabel(phase)}: bounce ${(b*100).toFixed(0)}% — above threshold!`,'#ff5252');
+      });
+    }
   } catch(e) {}
 }
 
-const ALERT_THRESHOLD = 0.60;
-const alertedPhases = new Set();
-
-function checkAlerts(data) {
-  if (!data.phase_breakdown) return;
-  Object.entries(data.phase_breakdown).forEach(([phase, d]) => {
-    const bounce = d.avg_bounce_rate || 0;
-    if (bounce >= ALERT_THRESHOLD && !alertedPhases.has(phase)) {
-      alertedPhases.add(phase);
-      const phaseName = phase === 'exploring' ? 'Exploration' : phase === 'evaluating' ? 'Evaluation' : 'Purchase';
-      logEvent(`⚠ ${phaseName}: bounce rate ${(bounce*100).toFixed(0)}% — above threshold!`, '#ff5252');
-    } else if (bounce < ALERT_THRESHOLD) {
-      alertedPhases.delete(phase);
-    }
-  });
-}
-
-async function fetchGA4() {
-  try {
-    const res = await fetch(`${API_BASE}/api/realtime`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    lastGA4Data = data;
-
-    if (!ga4Connected) {
-      ga4Connected = true;
-      setConnectionStatus(true);
-      logEvent('✓ Connesso a GA4 · dati reali attivi', '#a5d6a7');
-    }
-
-    syncUsersWithGA4(data);
-  } catch (e) {
-    setConnectionStatus(false, 'Simulation');
-    if (ga4Connected) {
-      ga4Connected = false;
-      logEvent('⚠ GA4 non raggiungibile · modalità simulazione', '#ffe082');
-    }
-  }
-}
-
-function syncUsersWithGA4(data) {
-  const target = data.phases;
-  const total = data.total_users || 0;
-  if (total === 0) return;
-
-  // Aggiorna contatori reali in header
-  realStats = {
-    exploring: target.exploring || 0,
-    evaluating: target.evaluating || 0,
-    purchasing: target.purchasing || 0,
-  };
-
-  // 1 pallino = 100 utenti reali
-  const USERS_PER_DOT = 100;
-
-  const current = { exploring: 0, evaluating: 0, purchasing: 0 };
-  users.forEach(u => current[u.phase]++);
-
-  ['exploring', 'evaluating', 'purchasing'].forEach(phase => {
-    const targetDots = Math.round((target[phase] || 0) / USERS_PER_DOT);
-    const currentDots = current[phase];
-    const diff = targetDots - currentDots;
-
-    if (diff > 0) {
-      for (let i = 0; i < diff; i++) setTimeout(() => addUser(phase, phase === 'exploring' && Math.random() < 0.20), i * 80);
-    } else if (diff < 0) {
-      let removed = 0;
-      for (let i = users.length - 1; i >= 0 && removed < Math.abs(diff); i--) {
-        if (users[i].phase === phase) { users.splice(i, 1); removed++; }
-      }
-      updateTargets();
-    }
-  });
-
-  logEvent(
-    `GA4: ${(target.exploring||0).toLocaleString('it-IT')} esplorano · ${(target.evaluating||0).toLocaleString('it-IT')} valutano · ${(target.purchasing||0).toLocaleString('it-IT')} acquistano`,
-    '#6b6b8a'
-  );
-}
-
-// ── Toggle sections ──────────────────────────────────────────
-function toggleSection(id) {
-  const body = document.getElementById('body-' + id);
-  const arrow = document.getElementById('arrow-' + id);
-  body.classList.toggle('open');
-  arrow.classList.toggle('open');
-}
-
-// ── Funnel UI update ──────────────────────────────────────────
-function updateFunnelUI(t) {
-  const set = (id, barId, val, alert) => {
-    const pct = (val * 100).toFixed(1) + '%';
-    const el = document.getElementById(id);
-    const bar = document.getElementById(barId);
-    if (el) {
-      el.textContent = pct;
-      if (alert) el.style.color = '#ff5252';
-    }
-    if (bar) {
-      bar.style.width = Math.min(100, val * 100) + '%';
-      if (alert) bar.style.background = '#ff5252';
-    }
-  };
-  set('pct-e2v', 'bar-e2v', t.explore_to_evaluate);
-  set('pct-v2p', 'bar-v2p', t.evaluate_to_purchase);
-  set('pct-v2e', 'bar-v2e', t.evaluate_to_explore);
-  set('pct-pc',  'bar-pc',  t.purchase_complete);
-}
-
-function updateBounceUI(data) {
-  if (!data || !data.phase_breakdown) return;
-  const set = (id, barId, val) => {
-    const alert = val >= 0.60;
-    const pct = (val * 100).toFixed(0) + '%';
-    const el = document.getElementById(id);
-    const bar = document.getElementById(barId);
-    if (el) { el.textContent = pct; el.style.color = alert ? '#ff5252' : ''; }
-    if (bar) { bar.style.width = Math.min(100, val * 100) + '%'; bar.style.background = alert ? '#ff5252' : ''; }
-  };
-  const pb = data.phase_breakdown;
-  if (pb.exploring)  set('pct-br-exp', 'bar-br-exp', pb.exploring.avg_bounce_rate  || 0);
-  if (pb.evaluating) set('pct-br-eva', 'bar-br-eva', pb.evaluating.avg_bounce_rate || 0);
-  if (pb.purchasing) set('pct-br-pur', 'bar-br-pur', pb.purchasing.avg_bounce_rate || 0);
+// ── Main loop ─────────────────────────────────────────────────
+function loop() {
+  globalFrame++;
+  // Update physics
+  updatePanelUsers('now',      transitions);
+  updatePanelUsers('noaction', getNoActionTransitions());
+  updatePanelUsers('tactics',  getTacticsTransitions());
+  // Draw
+  drawMessyMiddle({ ...panels.now,      frame: globalFrame }, { heatData: pageData, showHeat: true });
+  drawMessyMiddle({ ...panels.noaction, frame: globalFrame }, { showHeat: false });
+  drawMessyMiddle({ ...panels.tactics,  frame: globalFrame }, { showHeat: false });
+  updateStats();
+  requestAnimationFrame(loop);
 }
 
 // ── Init ──────────────────────────────────────────────────────
 function init() {
-  // Spawn utenti iniziali simulati (sostituiti da GA4 appena disponibile)
-  const initial = 8 + Math.floor(Math.random() * 5);
-  for (let i = 0; i < initial; i++) {
-    setTimeout(() => addUser(), i * 300);
-  }
+  // Seed initial dots
+  for (let i=0; i<10; i++) setTimeout(()=>addUserToPanel('now', null, false), i*200);
+  for (let i=0; i<8;  i++) setTimeout(()=>addUserToPanel('noaction', null, false), i*200);
+  for (let i=0; i<8;  i++) setTimeout(()=>addUserToPanel('tactics',  null, false), i*200);
 
-  // Tenta connessione GA4 subito
-  setConnectionStatus(false, 'Connecting...');
+  setConnectionStatus(false,'Connecting...');
   fetchGA4();
   fetchFunnel();
   fetchPages();
-  // Aggiorna funnel ogni 24h, pages ogni 5 min
-  setInterval(fetchFunnel, 24 * 60 * 60 * 1000);
-  setInterval(fetchPages, 5 * 60 * 1000);
-
-  // Aggiorna ogni 60 secondi
-  setInterval(fetchGA4, 5000);
-
-  // Auto-spawn simulazione (solo se GA4 non connesso)
-  function autoSpawn() {
-    if (!ga4Connected && users.length < 20) addUser();
-    setTimeout(autoSpawn, 4000 + Math.random() * 4000);
-  }
-  setTimeout(autoSpawn, 6000);
+  setInterval(fetchGA4,   5000);
+  setInterval(fetchFunnel, 24*60*60*1000);
+  setInterval(fetchPages,   5*60*1000);
 }
 
 init();
